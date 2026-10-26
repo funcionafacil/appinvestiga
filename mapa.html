@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Copiloto de Intereses de Investigación - SENA</title>
+    <style>
+        /* ====================================================
+           VARIABLES Y RESET
+           ==================================================== */
+        :root {
+            --sena-verde: #2E7D32;
+            --sena-verde-claro: #4CAF50;
+            --sena-azul: #1565C0;
+            --sena-gris: #263238;
+            --sena-naranja: #E65100;
+            --sena-dorado: #F9A825;
+            --sena-rojo: #C62828;
+            --bg-body: #F8FAFC;
+            --bg-card: #FFFFFF;
+            --shadow: 0 10px 25px rgba(0,0,0,0.08);
+            --radius: 16px;
+            --transition: all 0.3s ease;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Roboto, sans-serif; }
+
+        body {
+            background-color: var(--bg-body);
+            color: var(--sena-gris);
+            padding: 30px 15px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            padding: 40px;
+            box-shadow: var(--shadow);
+            position: relative;
+        }
+
+        /* HEADER */
+        .header { text-align: center; border-bottom: 4px solid var(--sena-verde); padding-bottom: 20px; margin-bottom: 30px; }
+        .header h1 { color: var(--sena-verde); font-size: 2rem; font-weight: 800; margin-bottom: 5px; }
+        .header p { color: #546E7A; font-size: 1.1rem; font-style: italic; }
+
+        /* BARRA DE LLMs */
+        .llm-bar {
+            background: #f8f9fa;
+            border-radius: var(--radius);
+            padding: 20px 22px;
+            margin: 0 0 30px 0;
+            border: 1px solid #e9ecef;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+        }
+        .llm-bar h3 {
+            color: var(--sena-gris);
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .llm-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            gap: 10px;
+        }
+        .llm-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px 14px;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-decoration: none;
+            color: #fff;
+            transition: var(--transition);
+            box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+        }
+        .llm-btn:hover { transform: translateY(-3px); box-shadow: 0 6px 15px rgba(0,0,0,0.2); filter: brightness(1.1); }
+        .llm-btn.gemini { background: linear-gradient(135deg, #4285F4, #1a73e8); }
+        .llm-btn.chatgpt { background: linear-gradient(135deg, #10a37f, #0d8a6a); }
+        .llm-btn.claude { background: linear-gradient(135deg, #d97706, #b45309); }
+        .llm-btn.perplexity { background: linear-gradient(135deg, #20808D, #17616b); }
+        .llm-btn.grok { background: linear-gradient(135deg, #1a1a1a, #333333); }
+        .llm-btn.deepseek { background: linear-gradient(135deg, #1565C0, #0d47a1); }
+        .llm-btn.kimi { background: linear-gradient(135deg, #7C3AED, #5b21b6); }
+        .llm-btn.glm { background: linear-gradient(135deg, #b45309, #78350f); }
+
+        /* TOGGLE BUTTONS PRINCIPALES */
+        .toggle-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 15px;
+        }
+        .toggle-tab-btn {
+            background: #F1F5F9;
+            color: #64748B;
+            border: 2px solid #E2E8F0;
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .toggle-tab-btn:hover { background: #E2E8F0; }
+        .toggle-tab-btn.active {
+            background: var(--sena-verde);
+            color: white;
+            border-color: var(--sena-verde);
+            box-shadow: 0 4px 12px rgba(46,125,50,0.3);
+        }
+
+        .tab-panel { display: none; animation: fadeIn 0.4s ease-in-out; }
+        .tab-panel.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* ESTILOS DE FORMULARIOS */
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+        .form-group { margin-bottom: 18px; }
+        .form-group label { display: block; font-size: 0.95rem; font-weight: 700; color: var(--sena-gris); margin-bottom: 8px; }
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #CFD8DC;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            transition: var(--transition);
+            font-family: inherit;
+        }
+        .form-control:focus { outline: none; border-color: var(--sena-verde); box-shadow: 0 0 0 3px rgba(46,125,50,0.1); }
+        textarea.form-control { min-height: 120px; resize: vertical; }
+
+        /* ESTILOS DE PROMPT BOX */
+        .prompt-box {
+            background: #1E293B;
+            color: #E2E8F0;
+            border-radius: 12px;
+            padding: 20px;
+            font-family: 'Consolas', monospace;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            margin: 20px 0;
+            border-left: 5px solid var(--sena-dorado);
+            position: relative;
+        }
+        .prompt-box .prompt-label {
+            display: block;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--sena-dorado);
+            margin-bottom: 10px;
+            font-family: 'Segoe UI', sans-serif;
+            font-weight: 800;
+        }
+        .btn-copy {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: var(--sena-dorado);
+            color: var(--sena-gris);
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: var(--transition);
+        }
+        .btn-copy:hover { background: #fbc02d; transform: scale(1.05); }
+
+        /* GESTIÓN DE PARTICIPANTES */
+        .participant-list { margin-top: 15px; display: flex; flex-direction: column; gap: 10px; }
+        .participant-item {
+            background: #F8FAFC;
+            border: 1px solid #E2E8F0;
+            padding: 12px 15px;
+            border-radius: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .participant-info { font-size: 0.9rem; }
+        .participant-info strong { color: var(--sena-azul); }
+        .btn-remove { background: #FFEBEE; color: #C62828; border: none; padding: 5px 10px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+
+        /* MATRIZ DE SEMAFORIZACIÓN */
+        .matrix-table { width: 100%; border-collapse: collapse; margin-top: 20px; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        .matrix-table th { background: var(--sena-gris); color: white; padding: 15px; text-align: left; font-size: 0.9rem; }
+        .matrix-table td { padding: 15px; border-bottom: 1px solid #E2E8F0; vertical-align: top; }
+        .matrix-table tr:last-child td { border-bottom: none; }
+        
+        .semaforo-group { display: flex; gap: 10px; flex-direction: column; }
+        .semaforo-btn {
+            display: flex; align-items: center; gap: 8px; padding: 8px 12px;
+            border: 2px solid #E2E8F0; border-radius: 8px; background: white;
+            cursor: pointer; font-weight: 600; font-size: 0.85rem; transition: all 0.2s;
+        }
+        .semaforo-btn.active[data-color="verde"] { background: #E8F5E9; border-color: var(--sena-verde); color: var(--sena-verde); }
+        .semaforo-btn.active[data-color="amarillo"] { background: #FFFDE7; border-color: var(--sena-dorado); color: #F57F17; }
+        .semaforo-btn.active[data-color="rojo"] { background: #FFEBEE; border-color: var(--sena-rojo); color: var(--sena-rojo); }
+
+        /* BOTONES ACCIÓN */
+        .btn-action {
+            background: var(--sena-azul); color: white; border: none;
+            padding: 12px 25px; border-radius: 30px; font-weight: 700; font-size: 1rem;
+            cursor: pointer; transition: var(--transition); display: inline-flex; align-items: center; gap: 8px;
+        }
+        .btn-action:hover { background: #0D47A1; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(21,101,192,0.3); }
+        .btn-action.success { background: var(--sena-verde); }
+        .btn-action.success:hover { background: #1b5e20; }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .container { padding: 20px; }
+            .form-grid { grid-template-columns: 1fr; }
+            .header h1 { font-size: 1.5rem; }
+            .toggle-tab-btn { font-size: 0.85rem; padding: 10px 15px; width: 100%; justify-content: center; }
+            .llm-grid { grid-template-columns: repeat(2, 1fr); }
+            .matrix-table { font-size: 0.8rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    
+    <!-- HEADER -->
+    <header class="header">
+        <h1>Copiloto de Intereses de Investigación</h1>
+        <p>Del Mapa de Empatía al Interés de Investigación Validado (3 Iteraciones)</p>
+    </header>
+
+    <!-- BARRA DE LLMs -->
+    <div class="llm-bar">
+        <h3>🚀 Abre tu LLM de preferencia (en nueva pestaña)</h3>
+        <div class="llm-grid">
+            <a href="https://gemini.google.com/app" target="_blank" class="llm-btn gemini">🔵 Gemini</a>
+            <a href="https://chatgpt.com/" target="_blank" class="llm-btn chatgpt">🟢 ChatGPT</a>
+            <a href="https://claude.ai/new" target="_blank" class="llm-btn claude">🟠 Claude</a>
+            <a href="https://www.perplexity.ai/" target="_blank" class="llm-btn perplexity">🟣 Perplexity</a>
+            <a href="https://grok.com/" target="_blank" class="llm-btn grok">⚫ Grok</a>
+            <a href="https://chat.deepseek.com/" target="_blank" class="llm-btn deepseek">🔷 DeepSeek</a>
+            <a href="https://www.kimi.ai/es-419" target="_blank" class="llm-btn kimi">🟡 KIMI</a>
+            <a href="https://glm5.app/es/glm-5-3-flash" target="_blank" class="llm-btn glm">🟤 GLM 5</a>
+        </div>
+    </div>
+
+    <!-- TOGGLE BUTTONS (3 ITERACIONES) -->
+    <div class="toggle-group">
+        <button class="toggle-tab-btn active" onclick="switchTab('iter1', this)">
+            📥 1. Datos y Prompt (Iteración 1)
+        </button>
+        <button class="toggle-tab-btn" onclick="switchTab('iter2', this)">
+            📊 Matriz de Evidencia (Iteración 2)
+        </button>
+        <button class="toggle-tab-btn" onclick="switchTab('iter3', this)">
+            🎯 Validación Socrática (Iteración 3)
+        </button>
+    </div>
+
+    <!-- ====================================================
+         ITERACIÓN 1: DATOS DE ENTRADA Y PROMPT BASE
+         ==================================================== -->
+    <div id="iter1" class="tab-panel active">
+        <div class="form-grid">
+            <div class="form-group">
+                <label>1. Grupo de Trabajo:</label>
+                <select id="inputGrupo" class="form-control">
+                    <option value="Biotecnología, Bioeconomía y Economía Circular">Grupo 1: Biotecnología</option>
+                    <option value="Seguridad Alimentaria (SAN) y Agroindustria">Grupo 2: Seguridad Alimentaria</option>
+                    <option value="Desarrollo Rural, Agroecología y Políticas">Grupo 3: Desarrollo Rural</option>
+                    <option value="Industria 4.0, Automatización, Robótica y Logística">Grupo 4: Industria 4.0</option>
+                    <option value="Comunicación Estratégica y Mediaciones Pedagógicas Inclusivas">Grupo 5: Pedagogía e Inclusión</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>2. Reto Asignado (Constructo 2):</label>
+                <input type="text" id="inputReto" class="form-control" value="Retos y desafíos en los tiempos de la IA" readonly>
+            </div>
+        </div>
+
+        <!-- GESTIÓN DE PARTICIPANTES -->
+        <div style="background: #F8FAFC; padding: 20px; border-radius: 12px; border: 1px solid #E2E8F0; margin-bottom: 20px;">
+            <h4 style="margin-bottom: 15px; color: var(--sena-azul);">3. Participantes del Grupo:</h4>
+            <div style="display: flex; gap: 10px;">
+                <select id="selectParticipante" class="form-control" style="flex: 2;">
+                    <option value="">-- Selecciona un participante --</option>
+                    <!-- Se llena con JS -->
+                </select>
+                <input type="text" id="inputAficion" class="form-control" style="flex: 1;" placeholder="Otros saberes/aficiones (opcional)">
+                <button class="btn-action" onclick="agregarParticipante()" style="padding: 10px 15px;">+ Añadir</button>
+            </div>
+            <div id="listaParticipantes" class="participant-list"></div>
+        </div>
+
+        <!-- PROMPT 1 -->
+        <h3 style="color: var(--sena-azul); margin-bottom: 10px;">🔵 Prompt para la Iteración 1 (Divergencia)</h3>
+        <p style="color: #555; font-size: 0.95rem; margin-bottom: 15px;">Copia este prompt y pégalo en tu LLM de preferencia <strong>junto con la foto del Mapa de Empatía</strong>. La IA leerá la imagen basándose en los 6 cuadrantes.</p>
+        
+        <div class="prompt-box">
+            <span class="prompt-label">Prompt de Extracción (Iteración 1)</span>
+            <button class="btn-copy" onclick="copiarPrompt('promptIter1')">📋 Copiar</button>
+            <div id="promptIter1">...</div>
+        </div>
+    </div>
+
+    <!-- ====================================================
+         ITERACIÓN 2: MATRIZ DE SEMAFORIZACIÓN
+         ==================================================== -->
+    <div id="iter2" class="tab-panel">
+        <h3 style="color: var(--sena-naranja); margin-bottom: 10px;">📊 Iteración 2: Convergencia y Evidencia Documental</h3>
+        <p style="color: #555; font-size: 0.95rem; margin-bottom: 20px;">Pega el resultado de tu LLM (los 5 clústeres) en los campos de abajo, busca evidencia en Perplexity o Google Scholar, y semaforiza.</p>
+
+        <div class="form-group">
+            <label>Resultado de la Iteración 1 (Pega el texto del LLM):</label>
+            <textarea id="inputResultadosIter1" class="form-control" placeholder="Pega aquí los 5 clústeres que te devolvió la IA..."></textarea>
+        </div>
+
+        <button class="btn-action" onclick="generarMatriz()">⚙️ Generar Matriz de 5 Intereses</button>
+
+        <div id="matrizContainer" style="display: none; margin-top: 30px;">
+            <h4 style="color: var(--sena-gris); margin-bottom: 15px;">Matriz de Evidencia y Pertinencia</h4>
+            <table class="matrix-table">
+                <thead>
+                    <tr>
+                        <th style="width: 25%;">Interés de Investigación</th>
+                        <th style="width: 30%;">Evidencia Documental (Perplexity)</th>
+                        <th style="width: 15%;">Misionalidad SENA</th>
+                        <th style="width: 15%;">Capacidad Personal</th>
+                        <th style="width: 15%;">Acción</th>
+                    </tr>
+                </thead>
+                <tbody id="tbodyMatriz">
+                    <!-- Se llena con JS -->
+                </tbody>
+            </table>
+        </div>
+
+        <div style="margin-top: 25px;">
+            <h4 style="color: var(--sena-naranja); margin-bottom: 10px;">🟠 Prompt para la Iteración 2 (Evidencia)</h4>
+            <p style="color: #555; font-size: 0.95rem; margin-bottom: 15px;">Si necesitas ayuda para encontrar evidencia o refinar el análisis, usa este prompt.</p>
+            <div class="prompt-box">
+                <span class="prompt-label">Prompt de Evidencia (Iteración 2)</span>
+                <button class="btn-copy" onclick="copiarPrompt('promptIter2')">📋 Copiar</button>
+                <div id="promptIter2">Actúa como un investigador experto en revisión sistemática. Basado en los 5 clústeres de intereses de investigación que te presento a continuación, ayúdame a buscar evidencia documental en la web para validar cuáles son realmente pertinentes.
+
+Para cada clúster, entrégame:
+1. Tres fuentes reales (artículos, normativas, informes del SENA o de entidades oficiales) que respalden la relevancia de ese interés.
+2. Un párrafo de 3 líneas explicando por qué esa evidencia es importante.
+
+[Pega aquí el resultado de la Iteración 1]</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ====================================================
+         ITERACIÓN 3: VALIDACIÓN SOCRÁTICA
+         ==================================================== -->
+    <div id="iter3" class="tab-panel">
+        <h3 style="color: var(--sena-verde); margin-bottom: 10px;">🎯 Iteración 3: Validación Socrática del Interés</h3>
+        <p style="color: #555; font-size: 0.95rem; margin-bottom: 20px;">El interés que hayas seleccionado en la Iteración 2 aparecerá aquí automáticamente para que lo valides con el Prompt Socrático.</p>
+
+        <div class="form-group">
+            <label>Interés Ganador Seleccionado (Desde Iteración 2):</label>
+            <input type="text" id="inputInteresGanador" class="form-control" readonly placeholder="Selecciona un interés en la Iteración 2 para que aparezca aquí...">
+        </div>
+
+        <div class="prompt-box">
+            <span class="prompt-label">Prompt Socrático (Iteración 3)</span>
+            <button class="btn-copy" onclick="copiarPrompt('promptIter3')">📋 Copiar</button>
+            <div id="promptIter3">Actúa como un metodólogo escéptico y un evaluador de proyectos de investigación. El grupo de investigadores quiere investigar el siguiente interés: [Interés Seleccionado].
+
+Por favor, hazme 5 preguntas socráticas y duras para verificar si este interés es sensato, viable y si realmente responde a un problema real del territorio. No me des la respuesta, solo hazme preguntas que me obliguen a pensar.
+
+Preguntas:
+1. ¿Cuál es el problema específico que resuelve esta investigación?
+2. ¿Qué evidencia empírica (datos, testimonios) demuestra que este interés es una necesidad sentida y no solo un deseo del grupo?
+3. ¿Qué alcance real puede tener este interés en el tiempo y con los recursos que tengo?
+4. ¿Quién más está investigando esto y qué valor agregado aporta nuestra investigación?
+5. Si dentro de un año el proyecto fracasa, ¿cuál sería la causa más probable?</div>
+        </div>
+
+        <div style="margin-top: 25px; background: #E8F5E9; padding: 20px; border-radius: 12px; border-left: 5px solid var(--sena-verde);">
+            <h4 style="color: var(--sena-verde); margin-bottom: 10px;">✅ Cierre del Ejercicio</h4>
+            <p style="font-size: 0.95rem;">Después de debatir las preguntas socráticas, ajusta el interés si es necesario y presiona el botón para generar el acta final.</p>
+            <button class="btn-action success" onclick="generarActa()">📄 Descargar Acta de Validación (PDF)</button>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // ============================================
+    // 1. DATOS DE LOS 27 PARTICIPANTES
+    // ============================================
+    const participantesData = [
+        { nombre: "Martha Elizabeth Cortés Rico", perfil: "Ing. de Alimentos, Mg. en Innovación y Biotecnología. Líder de TEINNOVA." },
+        { nombre: "Ángela Rocío Quevedo Isaza", perfil: "Bióloga, Mg. en Gestión del Agua. Investiga microalgas y bioprocesos." },
+        { nombre: "Barbara Angélica Venegas Moreno", perfil: "Ing. Forestal. Investiga producción de orellanas con biomasa residual." },
+        { nombre: "María Eugenia Agámez Jiménez", perfil: "Ing. Industrial, Mg. en Educación. Líder del Semillero SIGIO." },
+        { nombre: "Silvia Patricia Moreno Páez", perfil: "Ing. Forestal. Líder del Semillero Ambiental. Biodiversidad de la Orinoquía." },
+        { nombre: "Yeimmy Maritza Neusa Díaz", perfil: "Instructora e Investigadora Agroindustrial. Panadería sin gluten." },
+        { nombre: "Ana Carolina Acuña Gómez", perfil: "Ing. Agroindustrial, Mg. en Seguridad Alimentaria. Masa madre y harinas alternativas." },
+        { nombre: "Santiago Vargas Castro", perfil: "Técnico en Pastelería. Maestro pastelero con más de 20 años de experiencia." },
+        { nombre: "Beatriz Lorena Patiño Velásquez", perfil: "Administradora de Servicios de Salud. Investigadora en RSE y café." },
+        { nombre: "Carmen Sofía Reinel Corredor", perfil: "Diseñadora Gráfica y Técnica en Mesa y Bar. Líder del Semillero SABOR COLOMBIA." },
+        { nombre: "Fernando Gonzales Torres", perfil: "Profesional del Centro Ambiental y Ecoturístico del Nororiente Amazónico." },
+        { nombre: "Ronald David Soleno Wilches", perfil: "Ing. Agroindustrial, Dr. en Ciencias Agropecuarias. Políticas de asociatividad." },
+        { nombre: "Julián Andrés Pedroza Vivas", perfil: "Ing. Ambiental, Mg. en Desarrollo Sostenible. Biorremediación y agroecología." },
+        { nombre: "María Fernanda Guaca Sandoval", perfil: "Ing. Agroindustrial, Catadora Q Grader. Cafés especiales e inocuidad." },
+        { nombre: "Edison Andrés Sandoval Ordóñez", perfil: "Ing. de Sistemas, MBA. Desarrolla apps móviles de impacto social." },
+        { nombre: "Juan José Urazán Garcés", perfil: "Instructor Investigador del grupo DIDETIF. Prototipado y movilidad eléctrica." },
+        { nombre: "Leidy Johanna Forero Rincón", perfil: "Administradora de Empresas, MBA. Transformación digital de Mipymes." },
+        { nombre: "Diana Carolina Gálvez Coy", perfil: "Ing. Física, Mg. en Ciencias Física. Líder del Semillero Biometrónica." },
+        { nombre: "Johan Guillermo Gómez Flórez", perfil: "Ing. Logístico, Mg. en Tecnologías Digitales. Logística 4.0 y gamificación." },
+        { nombre: "Ángela Patricia Rojas Mejía", perfil: "Ing. Ambiental y Sanitaria. Huella de carbono y eficiencia energética." },
+        { nombre: "Mauricio Caicedo Marín", perfil: "Administrador de Empresas, Esp. en Negocios Internacionales. Semillero TINLOG." },
+        { nombre: "Juan Felipe Solarte Paredes", perfil: "Profesional del Centro Agropecuario del Cauca. Desarrollo rural." },
+        { nombre: "Jonathan Calderón Rojas", perfil: "Politólogo, Esp. en Pedagogía de la Lúdica. Metodologías STEAM y LEGO." },
+        { nombre: "Angel Raúl Roldan Cepero", perfil: "Tecnólogo en Mantenimiento Eléctrico. Creador de la serie PTP inclusiva en Lengua de Señas." },
+        { nombre: "Claudia Juliana León Pinto", perfil: "Ing. de Mercados, Esp. en Marketing Internacional. Líder del Semillero SICOVE." },
+        { nombre: "Angela Isadora Cardona Duque", perfil: "Administradora de Negocios, Mg. en Educación. Resignificación pedagógica." },
+        { nombre: "José Luis Castaño Muñoz", perfil: "Economista, MBA. Subdirector encargado del Centro de Comercio y Servicios." }
+    ];
+
+    let participantesSeleccionados = [];
+
+    // ============================================
+    // 2. INICIALIZACIÓN Y GESTIÓN DE PARTICIPANTES
+    // ============================================
+    window.onload = function() {
+        const select = document.getElementById('selectParticipante');
+        participantesData.forEach(p => {
+            let option = document.createElement('option');
+            option.value = p.nombre;
+            option.text = p.nombre;
+            select.appendChild(option);
+        });
+        actualizarPromptIter1(); // Inicializar prompt
+    };
+
+    function agregarParticipante() {
+        const select = document.getElementById('selectParticipante');
+        const nombre = select.value;
+        const aficion = document.getElementById('inputAficion').value.trim();
+        
+        if (!nombre) return;
+        if (participantesSeleccionados.find(p => p.nombre === nombre)) {
+            alert("Este participante ya está en la lista.");
+            return;
+        }
+
+        const perfilBase = participantesData.find(p => p.nombre === nombre).perfil;
+        const perfilCompleto = aficion ? `${perfilBase} | Otros saberes: ${aficion}` : perfilBase;
+
+        participantesSeleccionados.push({ nombre: nombre, perfil: perfilCompleto });
+        document.getElementById('inputAficion').value = '';
+        select.value = '';
+        renderizarParticipantes();
+        actualizarPromptIter1();
+    }
+
+    function eliminarParticipante(index) {
+        participantesSeleccionados.splice(index, 1);
+        renderizarParticipantes();
+        actualizarPromptIter1();
+    }
+
+    function renderizarParticipantes() {
+        const lista = document.getElementById('listaParticipantes');
+        lista.innerHTML = '';
+        participantesSeleccionados.forEach((p, index) => {
+            const div = document.createElement('div');
+            div.className = 'participant-item';
+            div.innerHTML = `
+                <div class="participant-info">
+                    <strong>${p.nombre}</strong><br>
+                    <span style="font-size: 0.8rem; color: #666;">${p.perfil}</span>
+                </div>
+                <button class="btn-remove" onclick="eliminarParticipante(${index})">X</button>
+            `;
+            lista.appendChild(div);
+        });
+    }
+
+    // ============================================
+    // 3. ACTUALIZAR PROMPT ITERACIÓN 1
+    // ============================================
+    function actualizarPromptIter1() {
+        const grupo = document.getElementById('inputGrupo').value;
+        const reto = document.getElementById('inputReto').value;
+        
+        let textoPerfiles = "";
+        participantesSeleccionados.forEach(p => {
+            textoPerfiles += `- ${p.nombre}: ${p.perfil}\n`;
+        });
+
+        if (participantesSeleccionados.length === 0) {
+            textoPerfiles = "[Aún no has agregado participantes. Agrégalos en el Gestor de Participantes.]";
+        }
+
+        const prompt = `Actúa como un metodólogo experto en investigación pedagógica y análisis territorial. Te adjunto la foto de un Mapa de Empatía construido por un grupo de investigadores del SENA sobre el tema: ${grupo} y en el marco del reto de la IA: "${reto}".
+
+La imagen contiene 6 cuadrantes que debes leer e interpretar: ¿Qué siento?, ¿Qué escucho?, ¿Qué veo?, ¿Qué se ha hecho?, ¿Con quién interactúa? y ¿Qué podemos hacer?
+
+Basado en la imagen y en los perfiles de los participantes que te presento a continuación, necesito que extraigas 5 Clústeres de Intereses de Investigación.
+
+Para cada clúster, debes darme:
+1. Un título corto (máximo 6 palabras).
+2. Una justificación basada en los post-its del mapa, mencionando explícitamente qué cuadrante evidencia ese interés.
+3. Dos criterios de validación:
+   - Capacidad de Respuesta Personal (CRP): ¿Qué tanto pueden aportar los participantes (según sus perfiles) para investigar esto?
+   - Misionalidad del SENA (MS): ¿Está esto dentro de las funciones del SENA (Formación, Certificación, Investigación, Emprendimiento, APE)?
+
+Perfiles de los participantes:
+${textoPerfiles}`;
+
+        document.getElementById('promptIter1').innerText = prompt;
+    }
+
+    // Escuchar cambios en el grupo
+    document.getElementById('inputGrupo').addEventListener('change', actualizarPromptIter1);
+
+    // ============================================
+    // 4. CAMBIO DE PESTAÑAS
+    // ============================================
+    function switchTab(tabId, btn) {
+        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.toggle-tab-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(tabId).classList.add('active');
+        btn.classList.add('active');
+    }
+
+    // ============================================
+    // 5. COPIAR PROMPT
+    // ============================================
+    function copiarPrompt(elementId) {
+        const texto = document.getElementById(elementId).innerText;
+        navigator.clipboard.writeText(texto).then(() => {
+            alert('¡Prompt copiado al portapapeles!');
+        }).catch(err => {
+            alert('Error al copiar. Selecciona el texto manualmente.');
+        });
+    }
+
+    // ============================================
+    // 6. GENERAR MATRIZ ITERACIÓN 2
+    // ============================================
+    function generarMatriz() {
+        const tbody = document.getElementById('tbodyMatriz');
+        tbody.innerHTML = '';
+        
+        // Simulamos que leemos el texto pegado y extraemos 5 intereses
+        for (let i = 1; i <= 5; i++) {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>
+                    <input type="text" class="form-control" id="interes_${i}" placeholder="Interés de Investigación ${i}" style="padding: 8px; font-size: 0.85rem;">
+                </td>
+                <td>
+                    <textarea class="form-control" id="evidencia_${i}" placeholder="Pega aquí el enlace o cita de Perplexity..." style="padding: 8px; font-size: 0.85rem; min-height: 80px;"></textarea>
+                </td>
+                <td>
+                    <div class="semaforo-group">
+                        <div class="semaforo-btn" data-color="verde" onclick="setSemaforo(this, 'ms_${i}')">🟢 Verde</div>
+                        <div class="semaforo-btn" data-color="amarillo" onclick="setSemaforo(this, 'ms_${i}')">🟡 Amarillo</div>
+                        <div class="semaforo-btn" data-color="rojo" onclick="setSemaforo(this, 'ms_${i}')">🔴 Rojo</div>
+                    </div>
+                </td>
+                <td>
+                    <div class="semaforo-group">
+                        <div class="semaforo-btn" data-color="verde" onclick="setSemaforo(this, 'crp_${i}')">🟢 Verde</div>
+                        <div class="semaforo-btn" data-color="amarillo" onclick="setSemaforo(this, 'crp_${i}')">🟡 Amarillo</div>
+                        <div class="semaforo-btn" data-color="rojo" onclick="setSemaforo(this, 'crp_${i}')">🔴 Rojo</div>
+                    </div>
+                </td>
+                <td>
+                    <button class="btn-action success" style="padding: 8px 12px; font-size: 0.8rem;" onclick="seleccionarGanador(${i})">Seleccionar</button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        }
+        document.getElementById('matrizContainer').style.display = 'block';
+    }
+
+    function setSemaforo(btn, groupId) {
+        const parent = btn.parentElement;
+        parent.querySelectorAll('.semaforo-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+    }
+
+    // ============================================
+    // 7. SELECCIONAR GANADOR (ACTUALIZA EL PROMPT 3)
+    // ============================================
+    function seleccionarGanador(index) {
+        const interes = document.getElementById(`interes_${index}`).value;
+        if (!interes) {
+            alert("Escribe el nombre del interés antes de seleccionarlo.");
+            return;
+        }
+        
+        // Actualizar el textbox de la iteración 3
+        document.getElementById('inputInteresGanador').value = interes;
+        
+        // Actualizar el Prompt 3
+        const prompt3 = `Actúa como un metodólogo escéptico y un evaluador de proyectos de investigación. El grupo de investigadores quiere investigar el siguiente interés: "${interes}".
+
+Por favor, hazme 5 preguntas socráticas y duras para verificar si este interés es sensato, viable y si realmente responde a un problema real del territorio. No me des la respuesta, solo hazme preguntas que me obliguen a pensar.
+
+Preguntas:
+1. ¿Cuál es el problema específico que resuelve esta investigación?
+2. ¿Qué evidencia empírica (datos, testimonios) demuestra que este interés es una necesidad sentida y no solo un deseo del grupo?
+3. ¿Qué alcance real puede tener este interés en el tiempo y con los recursos que tengo?
+4. ¿Quién más está investigando esto y qué valor agregado aporta nuestra investigación?
+5. Si dentro de un año el proyecto fracasa, ¿cuál sería la causa más probable?`;
+
+        document.getElementById('promptIter3').innerText = prompt3;
+        
+        // Cambiar a la pestaña 3 automáticamente
+        const btnIter3 = document.querySelectorAll('.toggle-tab-btn')[2];
+        switchTab('iter3', btnIter3);
+        alert(`Interés "${interes}" seleccionado. El Prompt 3 se ha actualizado.`);
+    }
+
+    // ============================================
+    // 8. GENERAR ACTA FINAL
+    // ============================================
+    function generarActa() {
+        const ganador = document.getElementById('inputInteresGanador').value;
+        if (!ganador) {
+            alert("Primero selecciona un interés ganador en la Iteración 2.");
+            return;
+        }
+        
+        alert(`📄 Acta de Validación generada:\n\nInterés de Investigación Validado: ${ganador}\n\nGrupo: ${document.getElementById('inputGrupo').value}\nReto: ${document.getElementById('inputReto').value}\n\n(En producción, esto descargaría un PDF).`);
+    }
+</script>
+
+</body>
+</html>
