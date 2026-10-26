@@ -492,7 +492,7 @@
         }
 
         /* ====================================================
-           DISEÑO DEL MAPA DE EMPATÍA (NUEVO)
+           DISEÑO DEL MAPA DE EMPATÍA
            ==================================================== */
         .empatia-image {
             width: 100%;
@@ -502,6 +502,20 @@
             box-shadow: var(--shadow-hover);
             border: 4px solid white;
             margin: 0 auto 25px auto;
+            display: block;
+        }
+
+        /* ====================================================
+           DISEÑO DE IMÁGENES EN CONTEXTUALIZACIÓN (NUEVO)
+           ==================================================== */
+        .contexto-imagen {
+            width: 100%;
+            max-width: 600px;
+            height: auto;
+            border-radius: 16px;
+            box-shadow: var(--shadow-hover);
+            border: 4px solid white;
+            margin: 20px auto;
             display: block;
         }
 
@@ -627,7 +641,7 @@
                 </div>
             </div>
 
-            <!-- 5. Contextualización -->
+            <!-- 5. Contextualización (Con Imágenes) -->
             <div class="timeline-item" onclick="openContentModal('contexto')">
                 <div class="timeline-graphic"><div class="timeline-circle"></div><div class="timeline-line"></div></div>
                 <div class="timeline-card">
@@ -638,7 +652,7 @@
                 </div>
             </div>
 
-            <!-- 6. Mapa de Empatía (Abre el nuevo modal) -->
+            <!-- 6. Mapa de Empatía -->
             <div class="timeline-item" onclick="openContentModal('empatia')">
                 <div class="timeline-graphic"><div class="timeline-circle"></div><div class="timeline-line"></div></div>
                 <div class="timeline-card">
@@ -824,7 +838,7 @@
     </div>
 
     <!-- ====================================================
-         MODAL 3: CONTEXTUALIZACIÓN (3 PESTAÑAS)
+         MODAL 3: CONTEXTUALIZACIÓN (AHORA CON IMÁGENES)
          ==================================================== -->
     <div class="modal-overlay" id="modalContexto">
         <div class="modal-content">
@@ -847,6 +861,8 @@
                     <h4 style="color:var(--sena-azul); margin-bottom:15px;">🔬 Taxonomía Tradicional (Bloom)</h4>
                     <p>Escala lineal de 6 niveles: Recordar, Comprender, Aplicar, Analizar, Evaluar, Crear. El investigador escala solo, con su propio esfuerzo cognitivo.</p>
                 </div>
+                <!-- IMAGEN 1: TAXONOMÍA TRADICIONAL -->
+                <img src="img/taxo1.jpeg" alt="Taxonomía Tradicional" class="contexto-imagen" onerror="this.style.display='none'">
             </div>
 
             <div id="ctx2" class="tab-panel">
@@ -855,6 +871,8 @@
                     <p><strong>Nivel 0: Explorar y Situar.</strong> Aquí el investigador <strong>no delega</strong>; inyecta contexto (Context Engineering) y se sumerge en el territorio.</p>
                     <p>Solo después de este anclaje humano, la IA puede ser usada como asistente en los niveles superiores (Formular, Analizar, Transferir).</p>
                 </div>
+                <!-- IMAGEN 2: TAXONOMÍA EMERGENTE -->
+                <img src="img/taxo2.jpeg" alt="Taxonomía Emergente" class="contexto-imagen" onerror="this.style.display='none'">
             </div>
 
             <div id="ctx3" class="tab-panel">
@@ -869,7 +887,7 @@
     </div>
 
     <!-- ====================================================
-         MODAL 4: MAPA DE EMPATÍA (NUEVO)
+         MODAL 4: MAPA DE EMPATÍA
          ==================================================== -->
     <div class="modal-overlay" id="modalEmpatia">
         <div class="modal-content">
@@ -887,7 +905,6 @@
                 </button>
             </div>
 
-            <!-- PESTAÑA 1: EXPLICACIÓN Y EJEMPLO -->
             <div id="emp1" class="tab-panel active">
                 <div class="callout" style="background: #E3F2FD; border-left-color: var(--sena-azul); color: #0D47A1; margin-top: 0;">
                     <div class="callout-title" style="color: var(--sena-azul);">🎯 El Objetivo del Mapa</div>
@@ -906,7 +923,6 @@
                 <img src="img/empatia.png" alt="Ejemplo de Mapa de Empatía" class="empatia-image" onerror="this.style.display='none';">
             </div>
 
-            <!-- PESTAÑA 2: DOFA Y SEMAFORIZACIÓN -->
             <div id="emp2" class="tab-panel">
                 <div class="comp-box bloom">
                     <h4 style="color:var(--sena-azul); margin-bottom:15px;">1. De los Post-its a la Matriz DOFA</h4>
@@ -924,7 +940,6 @@
                 </div>
             </div>
 
-            <!-- PESTAÑA 3: PROMPT PARA LA IA -->
             <div id="emp3" class="tab-panel">
                 <div class="callout" style="margin-top: 0;">
                     <div class="callout-title">🤖 Prompt Maestro para la IA</div>
@@ -1053,12 +1068,9 @@
             <!-- CONTENIDO DE LOS GRUPOS CON IMÁGENES -->
             <div id="g1" class="tab-panel active">
                 <div class="grupo-content">
-                    <!-- IMAGEN DEL GRUPO 1 -->
                     <img src="img/g1.jpeg" alt="Grupo 1 Biotecnología" class="grupo-imagen" onerror="this.style.display='none'">
-                    
                     <div class="grupo-titulo">Biotecnología, Bioeconomía y Economía Circular</div>
                     <div class="grupo-descripcion">Foco: Valorización de subproductos orgánicos, microalgas, biomasa y biodiversidad.</div>
-                    
                     <ul id="listaG1" class="integrantes-lista" style="display: none;">
                         <li class="integrante-item"><span>👩‍🔬</span> Martha Elizabeth Cortés Rico</li>
                         <li class="integrante-item"><span>👩‍🔬</span> Ángela Rocío Quevedo Isaza</li>
@@ -1071,12 +1083,9 @@
 
             <div id="g2" class="tab-panel">
                 <div class="grupo-content">
-                    <!-- IMAGEN DEL GRUPO 2 -->
                     <img src="img/g2.jpeg" alt="Grupo 2 Seguridad Alimentaria" class="grupo-imagen" onerror="this.style.display='none'">
-                    
                     <div class="grupo-titulo">Seguridad Alimentaria (SAN) y Agroindustria</div>
                     <div class="grupo-descripcion">Foco: Formulación bromatológica, panificación, cafés especiales y análisis sensorial.</div>
-                    
                     <ul id="listaG2" class="integrantes-lista" style="display: none;">
                         <li class="integrante-item"><span>👩‍🍳</span> Yeimmy Maritza Neusa Díaz</li>
                         <li class="integrante-item"><span>👩‍🍳</span> Ana Carolina Acuña Gómez</li>
@@ -1089,12 +1098,9 @@
 
             <div id="g3" class="tab-panel">
                 <div class="grupo-content">
-                    <!-- IMAGEN DEL GRUPO 3 -->
                     <img src="img/g3.jpeg" alt="Grupo 3 Desarrollo Rural" class="grupo-imagen" onerror="this.style.display='none'">
-                    
                     <div class="grupo-titulo">Desarrollo Rural, Agroecología y Políticas</div>
                     <div class="grupo-descripcion">Foco: Extensionismo, agroecología, movilidad eléctrica y apps para el agro.</div>
-                    
                     <ul id="listaG3" class="integrantes-lista" style="display: none;">
                         <li class="integrante-item"><span>👨‍🌾</span> Ronald David Soleno Wilches</li>
                         <li class="integrante-item"><span>👨‍🌾</span> Julián Andrés Pedroza Vivas</li>
@@ -1109,12 +1115,9 @@
 
             <div id="g4" class="tab-panel">
                 <div class="grupo-content">
-                    <!-- IMAGEN DEL GRUPO 4 -->
                     <img src="img/g4.jpeg" alt="Grupo 4 Industria 4.0" class="grupo-imagen" onerror="this.style.display='none'">
-                    
                     <div class="grupo-titulo">Industria 4.0, Automatización, Robótica y Logística</div>
                     <div class="grupo-descripcion">Foco: Mecatrónica, robótica, logística 4.0, VR/AR y seguridad industrial.</div>
-                    
                     <ul id="listaG4" class="integrantes-lista" style="display: none;">
                         <li class="integrante-item"><span>👩‍🔧</span> Leidy Johanna Forero Rincón</li>
                         <li class="integrante-item"><span>👩‍🔬</span> Diana Carolina Gálvez Coy</li>
@@ -1127,12 +1130,9 @@
 
             <div id="g5" class="tab-panel">
                 <div class="grupo-content">
-                    <!-- IMAGEN DEL GRUPO 5 -->
                     <img src="img/g5.jpeg" alt="Grupo 5 Pedagogía e Inclusión" class="grupo-imagen" onerror="this.style.display='none'">
-                    
                     <div class="grupo-titulo">Comunicación Estratégica y Mediaciones Pedagógicas Inclusivas</div>
                     <div class="grupo-descripcion">Foco: Lúdica (STEAM/LEGO), inclusión en Lengua de Señas, marketing digital y formación docente.</div>
-                    
                     <ul id="listaG5" class="integrantes-lista" style="display: none;">
                         <li class="integrante-item"><span>👨‍🏫</span> Jonathan Calderón Rojas</li>
                         <li class="integrante-item"><span>👨‍🏫</span> Angel Raúl Roldan Cepero</li>
