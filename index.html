@@ -1,0 +1,1350 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>APLICACIÓN DE LA INTELIGENCIA ARTIFICIAL EN LA INVESTIGACIÓN PEDAGÓGICA</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* ====================================================
+           VARIABLES Y RESET
+           ==================================================== */
+        :root {
+            --primary-blue: #3B82F6;
+            --primary-blue-light: #EFF6FF;
+            --bg-body: #F8FAFC;
+            --bg-card: #FFFFFF;
+            --text-main: #1E293B;
+            --text-muted: #64748B;
+            --line-color: #CBD5E1;
+            --sena-verde: #2E7D32;
+            --sena-azul: #1565C0;
+            --sena-naranja: #E65100;
+            --shadow-soft: 0 4px 20px rgba(0,0,0,0.05);
+            --shadow-hover: 0 20px 40px rgba(0,0,0,0.2);
+            --radius-card: 20px;
+            --radius-inner: 12px;
+            --radius-pill: 50px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+
+        body {
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        /* ====================================================
+           CONTENEDOR PRINCIPAL (App)
+           ==================================================== */
+        .app-container {
+            background-color: var(--bg-card);
+            width: 100%;
+            max-width: 450px;
+            border-radius: 40px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+            padding: 30px 20px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 90vh;
+            min-height: 700px;
+        }
+
+        /* HEADER */
+        .header { margin-bottom: 20px; padding: 0 10px; }
+        .header .date { color: var(--primary-blue); font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
+        .header h1 { font-size: 1.3rem; font-weight: 800; letter-spacing: -0.5px; line-height: 1.2; color: var(--text-main); }
+
+        /* CALENDARIO HORIZONTAL */
+        .week-calendar {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 25px;
+            padding: 0 5px;
+            border-bottom: 1px solid #F1F5F9;
+            padding-bottom: 15px;
+        }
+        .day-item {
+            display: flex; flex-direction: column; align-items: center; gap: 8px;
+            cursor: pointer; padding: 8px 10px; border-radius: 12px; transition: all 0.2s;
+        }
+        .day-item:hover { background-color: var(--primary-blue-light); }
+        .day-item.active { background-color: var(--primary-blue-light); }
+        .day-name { font-size: 0.7rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; }
+        .day-number { font-size: 1.1rem; font-weight: 700; color: var(--text-main); }
+        .day-item.active .day-name, .day-item.active .day-number { color: var(--primary-blue); }
+        .day-item.active::after { content: ''; width: 4px; height: 4px; background: var(--primary-blue); border-radius: 50%; margin-top: 2px; }
+
+        /* LÍNEA DE TIEMPO */
+        .timeline-container {
+            flex-grow: 1; overflow-y: auto; padding-left: 10px; padding-bottom: 80px; scrollbar-width: thin;
+        }
+        .timeline-container::-webkit-scrollbar { width: 6px; }
+        .timeline-container::-webkit-scrollbar-thumb { background: #E2E8F0; border-radius: 10px; }
+
+        .timeline-item {
+            display: flex; gap: 20px; margin-bottom: 18px; position: relative; cursor: pointer;
+        }
+
+        .timeline-graphic { display: flex; flex-direction: column; align-items: center; min-width: 20px; }
+        .timeline-circle {
+            width: 14px; height: 14px; border: 3px solid var(--line-color); border-radius: 50%;
+            background: var(--bg-card); z-index: 2; transition: all 0.3s;
+        }
+        .timeline-line {
+            width: 2px; background-color: var(--line-color); flex-grow: 1; margin-top: 5px; margin-bottom: -18px; z-index: 1;
+        }
+
+        .timeline-card {
+            background: var(--bg-body); border-radius: var(--radius-card); padding: 18px 20px;
+            flex-grow: 1; transition: all 0.3s; border: 1px solid transparent;
+        }
+        .timeline-card:hover { border-color: var(--primary-blue-light); box-shadow: var(--shadow-soft); transform: translateY(-2px); }
+
+        .card-header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+        .card-title { font-size: 1rem; font-weight: 700; color: var(--text-main); }
+        .card-time { font-size: 0.8rem; font-weight: 600; color: var(--primary-blue); }
+        
+        .card-empty-content {
+            height: 20px;
+            background: repeating-linear-gradient(45deg, #F1F5F9, #F1F5F9 10px, #E2E8F0 10px, #E2E8F0 20px);
+            border-radius: 6px; margin-top: 10px; opacity: 0.7;
+        }
+
+        /* CONTENEDOR DE CONTEXTUALIZACIÓN */
+        .context-container {
+            margin-top: 12px; padding: 15px; background-color: var(--bg-card);
+            border-radius: var(--radius-inner); border-left: 4px solid var(--sena-verde);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+        .context-text {
+            font-size: 0.85rem; font-weight: 800; color: var(--text-main); line-height: 1.4; letter-spacing: 0.5px; text-transform: uppercase;
+        }
+        .timeline-item.active .context-container { background-color: rgba(255, 255, 255, 0.15); border-left: 4px solid #FFFFFF; }
+        .timeline-item.active .context-text { color: #FFFFFF; }
+
+        /* TARJETA ACTIVA */
+        .timeline-item.active .timeline-circle { border-color: var(--primary-blue); background: var(--primary-blue); box-shadow: 0 0 0 4px var(--primary-blue-light); }
+        .timeline-item.active .timeline-line { background-color: var(--primary-blue); }
+        .timeline-item.active .timeline-card { background: var(--primary-blue); color: white; box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4); }
+        .timeline-item.active .card-title, .timeline-item.active .card-time { color: white; }
+        .timeline-item.active .card-empty-content { background: rgba(255, 255, 255, 0.2); }
+
+        /* BOTÓN FLOTANTE (FAB) */
+        .fab {
+            position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
+            width: 60px; height: 60px; background: var(--primary-blue); color: white;
+            border-radius: 20px; display: flex; justify-content: center; align-items: center;
+            font-size: 2rem; font-weight: 300; box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
+            cursor: pointer; transition: all 0.2s; z-index: 10;
+        }
+        .fab:hover { transform: translateX(-50%) scale(1.05); }
+        .fab:active { transform: translateX(-50%) scale(0.95); }
+
+        /* BARRA INFERIOR */
+        .bottom-nav {
+            position: absolute; bottom: 0; left: 0; right: 0; height: 80px;
+            background: white; border-top: 1px solid #F1F5F9;
+            display: flex; justify-content: space-around; align-items: center; padding: 0 40px; z-index: 5;
+        }
+        .nav-item { color: #CBD5E1; font-size: 1.5rem; cursor: pointer; transition: color 0.2s; }
+        .nav-item.active { color: var(--primary-blue); }
+
+        /* ====================================================
+           MODAL / OVERLAY GENERAL (EXPANDIDO AL 90%)
+           ==================================================== */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(6px);
+            display: flex; justify-content: center; align-items: center;
+            opacity: 0; visibility: hidden; transition: all 0.3s ease; z-index: 100;
+        }
+        .modal-overlay.active { opacity: 1; visibility: visible; }
+
+        .modal-content {
+            background: white; 
+            padding: 40px; 
+            border-radius: 24px; 
+            text-align: left;
+            width: 90vw; 
+            height: 90vh; 
+            max-width: 1400px;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            transform: translateY(20px) scale(0.98); 
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: var(--shadow-hover); 
+            position: relative;
+        }
+        .modal-overlay.active .modal-content { 
+            transform: translateY(0) scale(1); 
+        }
+
+        /* Estilos para el contenido del modal */
+        .modal-content h2 { font-size: 2rem; color: var(--text-main); margin-bottom: 25px; font-weight: 800; border-bottom: 2px solid var(--primary-blue-light); padding-bottom: 15px; display: flex; justify-content: space-between; align-items: center; }
+        .modal-content h3 { font-size: 1.4rem; color: var(--text-main); margin-top: 20px; margin-bottom: 10px; }
+        .modal-content h4 { font-size: 1.1rem; margin-bottom: 8px; }
+        .modal-content p { color: var(--text-muted); font-size: 1.05rem; margin-bottom: 10px; line-height: 1.6; }
+        
+        /* Cajas comparativas dentro del modal */
+        .comp-box { background: #ffffff; border-radius: 12px; padding: 25px; margin-bottom: 20px; border: 1px solid #E2E8F0; }
+        .comp-box.bloom { border-top: 6px solid var(--sena-azul); }
+        .comp-box.emergente { border-top: 6px solid var(--sena-verde); background: #F9FBE7; }
+        .comp-box p { margin-bottom: 10px; }
+        
+        .callout { background: #FFF3E0; border-left: 6px solid var(--sena-naranja); border-radius: 0 8px 8px 0; padding: 20px 25px; margin: 20px 0; font-size: 1.05rem; color: #4E342E; }
+        .callout-title { font-weight: 800; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; text-transform: uppercase; font-size: 0.9rem; letter-spacing: 1px; }
+
+        /* ====================================================
+           ESTILOS DE TOGGLE BUTTONS (MODALES)
+           ==================================================== */
+        .toggle-btn-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 15px;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #E2E8F0;
+            padding-bottom: 15px;
+        }
+        .toggle-tab-btn {
+            background: #F1F5F9;
+            color: #64748B;
+            border: 2px solid #E2E8F0;
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .toggle-tab-btn:hover { background: #E2E8F0; }
+        .toggle-tab-btn.active {
+            background: var(--primary-blue);
+            color: white;
+            border-color: var(--primary-blue);
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+        }
+        .tab-panel {
+            display: none;
+            animation: fadeIn 0.4s ease-in-out;
+            flex-grow: 1;
+        }
+        .tab-panel.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .btn-close-modal {
+            background: var(--primary-blue); color: white; border: none; padding: 15px 30px;
+            border-radius: 50px; font-weight: 700; font-size: 1.1rem; cursor: pointer;
+            transition: background 0.2s, transform 0.2s; width: 100%; margin-top: auto; display: flex; justify-content: center;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+        }
+        .btn-close-modal:hover { background: #2563EB; transform: translateY(-2px); }
+
+        /* ====================================================
+           GRID DE PARTICIPANTES
+           ==================================================== */
+        .participants-grid {
+            display: grid;
+            grid-template-columns: repeat(9, 1fr);
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-grow: 1;
+            align-content: start;
+        }
+        
+        .participant-btn {
+            background: #F1F5F9;
+            border: 2px solid #E2E8F0;
+            border-radius: 12px;
+            padding: 15px;
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-main);
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            aspect-ratio: 1;
+            position: relative;
+        }
+        .participant-btn:hover { background: #E2E8F0; border-color: var(--primary-blue); transform: translateY(-3px); box-shadow: var(--shadow-soft); }
+        
+        .participant-btn .num { font-size: 1.8rem; color: var(--primary-blue); line-height: 1; }
+        
+        /* ESTADO SELECCIONADO (Fondo Rojo) */
+        .participant-btn.selected {
+            background: #EF4444;
+            border-color: #DC2626;
+            color: white;
+            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
+        }
+        .participant-btn.selected .num { color: white; }
+
+        /* Botón Reiniciar en el título */
+        .btn-reset {
+            background: #FFEBEE;
+            color: #C62828;
+            border: 1px solid #FFCDD2;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-reset:hover { background: #FFCDD2; transform: scale(1.02); }
+
+        /* SWITCH PARA OCULTAR NOMBRE EN EL MODAL INTERNO */
+        .switch-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #F8FAFC;
+            padding: 15px 25px;
+            border-radius: 16px;
+            margin-bottom: 20px;
+            border: 1px solid #E2E8F0;
+        }
+        .switch-label { font-size: 1.1rem; font-weight: 700; color: var(--text-main); }
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #CBD5E1;
+            transition: .4s;
+            border-radius: 34px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider { background-color: var(--sena-verde); }
+        input:checked + .slider:before { transform: translateX(26px); }
+
+        .nombre-real {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--sena-verde);
+            margin-top: 15px;
+            text-align: center;
+            padding: 20px;
+            background: #E8F5E9;
+            border-radius: 12px;
+            display: none;
+            border: 2px solid #A5D6A7;
+        }
+        .nombre-real.visible { display: block; animation: fadeIn 0.3s ease-in-out; }
+
+        /* ====================================================
+           DISEÑO DEL DETALLE DEL PERSONAJE
+           ==================================================== */
+        .personaje-layout {
+            display: flex;
+            align-items: stretch;
+            gap: 30px;
+            margin-bottom: 25px;
+            flex-grow: 1;
+        }
+        .personaje-rasgo {
+            flex: 2;
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 30px;
+            border-top: 8px solid var(--sena-naranja);
+            border-left: 1px solid #E2E8F0;
+            border-right: 1px solid #E2E8F0;
+            border-bottom: 1px solid #E2E8F0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .personaje-rasgo h4 { color: var(--sena-naranja); margin-bottom: 15px; font-size: 1.2rem; text-transform: uppercase; letter-spacing: 1px; }
+        .personaje-rasgo p { font-size: 1.3rem; color: var(--text-main); line-height: 1.6; font-weight: 500; margin: 0; }
+        
+        .personaje-marca-grande {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: #F8FAFC;
+            border-radius: 16px;
+            padding: 30px;
+            border: 4px dashed #CBD5E1;
+        }
+        .personaje-marca-icon {
+            font-size: 10rem;
+            line-height: 1;
+            margin-bottom: 15px;
+            filter: drop-shadow(0 10px 15px rgba(0,0,0,0.15));
+            animation: float 3s ease-in-out infinite;
+        }
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+        .personaje-marca-texto {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--sena-verde);
+            text-transform: uppercase;
+            text-align: center;
+            background: white;
+            padding: 10px 20px;
+            border-radius: 12px;
+            box-shadow: var(--shadow-soft);
+        }
+
+        /* ====================================================
+           DISEÑO DE CONFORMACIÓN DE GRUPOS (CON IMAGEN)
+           ==================================================== */
+        .grupo-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 40px;
+            background: #F8FAFC;
+            border-radius: 16px;
+            border: 2px dashed #CBD5E1;
+            min-height: 300px;
+        }
+        
+        /* Contenedor de la imagen del grupo */
+        .grupo-imagen {
+            width: 100%;
+            max-width: 600px;
+            height: 300px;
+            object-fit: cover;
+            border-radius: 16px;
+            margin-bottom: 25px;
+            box-shadow: var(--shadow-soft);
+            border: 4px solid white;
+        }
+
+        .grupo-titulo {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--text-main);
+            margin-bottom: 10px;
+        }
+        .grupo-descripcion {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            max-width: 600px;
+            line-height: 1.6;
+        }
+        .integrantes-lista {
+            list-style: none;
+            padding: 0;
+            margin-top: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            width: 100%;
+        }
+        .integrante-item {
+            background: white;
+            padding: 15px 20px;
+            border-radius: 12px;
+            box-shadow: var(--shadow-soft);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-main);
+            border-left: 4px solid var(--primary-blue);
+        }
+        .integrante-item span {
+            font-size: 1.5rem;
+        }
+
+        /* ====================================================
+           DISEÑO DEL MAPA DE EMPATÍA (NUEVO)
+           ==================================================== */
+        .empatia-image {
+            width: 100%;
+            max-width: 800px;
+            height: auto;
+            border-radius: 16px;
+            box-shadow: var(--shadow-hover);
+            border: 4px solid white;
+            margin: 0 auto 25px auto;
+            display: block;
+        }
+
+        /* ====================================================
+           RESPONSIVE (PC / TABLET) - LAYOUT HORIZONTAL
+           ==================================================== */
+        @media (min-width: 768px) {
+            .app-container {
+                max-width: 1100px;
+                height: 85vh;
+                flex-direction: row;
+                padding: 0;
+            }
+            .header { position: absolute; top: 20px; left: 50px; z-index: 10; }
+            .header h1 { font-size: 1.4rem; }
+            .week-calendar {
+                flex-direction: column;
+                justify-content: flex-start;
+                width: 200px;
+                min-width: 200px;
+                height: 100%;
+                background: #F8FAFC;
+                border-right: 1px solid #E2E8F0;
+                border-bottom: none;
+                padding: 120px 20px 20px 20px;
+                margin-bottom: 0;
+                gap: 15px;
+            }
+            .day-item { flex-direction: row; justify-content: flex-start; padding: 12px 15px; width: 100%; }
+            .day-item.active { background: var(--primary-blue-light); }
+            .day-item.active::after { display: none; }
+            .day-name { width: 40px; text-align: left; }
+            .day-number { font-size: 1.2rem; }
+            .timeline-container { padding: 120px 40px 40px 40px; height: 100%; }
+            .timeline-item { gap: 30px; }
+            .timeline-card { padding: 22px 30px; }
+            .card-title { font-size: 1.15rem; }
+            .fab { bottom: 40px; left: auto; right: 40px; transform: none; }
+            .fab:hover { transform: scale(1.05); }
+            .bottom-nav { display: none; }
+            
+            .modal-content { max-width: 1200px; width: 90vw; height: 90vh; padding: 50px; }
+            .participants-grid { grid-template-columns: repeat(9, 1fr); gap: 20px; }
+        }
+
+        /* Ajustes específicos para móviles */
+        @media (max-width: 768px) {
+            .modal-content { width: 95vw; height: 95vh; padding: 20px; }
+            .modal-content h2 { font-size: 1.4rem; }
+            .participants-grid { grid-template-columns: repeat(4, 1fr); gap: 8px; }
+            .participant-btn .num { font-size: 1.2rem; }
+            .personaje-layout { flex-direction: column; }
+            .personaje-marca-icon { font-size: 6rem; }
+            .personaje-rasgo p { font-size: 1rem; }
+            .toggle-tab-btn { font-size: 0.8rem; padding: 8px 12px; }
+            .grupo-content { padding: 20px; }
+            .grupo-imagen { height: 200px; }
+            .grupo-titulo { font-size: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        
+        <!-- HEADER -->
+        <div class="header">
+            <div class="date">Lunes, 26 de Octubre</div>
+            <h1>APLICACIÓN DE LA INTELIGENCIA ARTIFICIAL EN LA INVESTIGACIÓN PEDAGÓGICA</h1>
+        </div>
+
+        <!-- CALENDARIO -->
+        <div class="week-calendar">
+            <div class="day-item active" onclick="openModal('Cambiar al Lunes 26')"><span class="day-name">Lun</span><span class="day-number">26</span></div>
+            <div class="day-item" onclick="openModal('Cambiar al Martes 27')"><span class="day-name">Mar</span><span class="day-number">27</span></div>
+            <div class="day-item" onclick="openModal('Cambiar al Miércoles 28')"><span class="day-name">Mié</span><span class="day-number">28</span></div>
+            <div class="day-item" onclick="openModal('Cambiar al Jueves 29')"><span class="day-name">Jue</span><span class="day-number">29</span></div>
+            <div class="day-item" onclick="openModal('Cambiar al Viernes 30')"><span class="day-name">Vie</span><span class="day-number">30</span></div>
+        </div>
+
+        <!-- LÍNEA DE TIEMPO -->
+        <div class="timeline-container">
+            
+            <!-- 1. Introducción al evento -->
+            <div class="timeline-item" onclick="openContentModal('intro')">
+                <div class="timeline-graphic">
+                    <div class="timeline-circle"></div>
+                    <div class="timeline-line"></div>
+                </div>
+                <div class="timeline-card">
+                    <div class="card-header-row">
+                        <div class="card-title">Introducción al evento</div>
+                        <div class="card-time">8:00 AM</div>
+                    </div>
+                    <div class="card-empty-content"></div>
+                </div>
+            </div>
+
+            <!-- 2. Presentación de los participantes -->
+            <div class="timeline-item" onclick="openContentModal('participantes')">
+                <div class="timeline-graphic"><div class="timeline-circle"></div><div class="timeline-line"></div></div>
+                <div class="timeline-card">
+                    <div class="card-header-row"><div class="card-title">Presentación de los participantes</div><div class="card-time">8:30 AM</div></div>
+                    <div class="card-empty-content"></div>
+                </div>
+            </div>
+
+            <!-- 3. Conformación de grupos de trabajo -->
+            <div class="timeline-item" onclick="openContentModal('grupos')">
+                <div class="timeline-graphic"><div class="timeline-circle"></div><div class="timeline-line"></div></div>
+                <div class="timeline-card">
+                    <div class="card-header-row"><div class="card-title">Conformación de grupos de trabajo</div><div class="card-time">9:30 AM</div></div>
+                    <div class="card-empty-content"></div>
+                </div>
+            </div>
+
+            <!-- 4. Actividad de reflexión Inicial -->
+            <div class="timeline-item" onclick="openContentModal('reflexion')">
+                <div class="timeline-graphic"><div class="timeline-circle"></div><div class="timeline-line"></div></div>
+                <div class="timeline-card">
+                    <div class="card-header-row"><div class="card-title">Actividad de reflexión Inicial</div><div class="card-time">10:15 AM</div></div>
+                    <div class="card-empty-content"></div>
+                </div>
+            </div>
+
+            <!-- 5. Contextualización -->
+            <div class="timeline-item" onclick="openContentModal('contexto')">
+                <div class="timeline-graphic"><div class="timeline-circle"></div><div class="timeline-line"></div></div>
+                <div class="timeline-card">
+                    <div class="card-header-row"><div class="card-title">Contextualización</div><div class="card-time">10:45 AM</div></div>
+                    <div class="context-container">
+                        <div class="context-text">APLICACIÓN DE LA INTELIGENCIA ARTIFICIAL EN LA INVESTIGACIÓN PEDAGÓGICA</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 6. Mapa de Empatía (Abre el nuevo modal) -->
+            <div class="timeline-item" onclick="openContentModal('empatia')">
+                <div class="timeline-graphic"><div class="timeline-circle"></div><div class="timeline-line"></div></div>
+                <div class="timeline-card">
+                    <div class="card-header-row"><div class="card-title">Mapa de Empatía</div><div class="card-time">11:30 AM</div></div>
+                    <div class="card-empty-content"></div>
+                </div>
+            </div>
+
+            <!-- 7. Retos de la pedagogía en tiempos de la IA -->
+            <div class="timeline-item" onclick="openModal('Retos de la pedagogía en tiempos de la IA')">
+                <div class="timeline-graphic"><div class="timeline-circle"></div><div class="timeline-line"></div></div>
+                <div class="timeline-card">
+                    <div class="card-header-row"><div class="card-title">Retos de la pedagogía en tiempos de la IA</div><div class="card-time">2:00 PM</div></div>
+                    <div class="card-empty-content"></div>
+                </div>
+            </div>
+
+            <!-- 8. La pregunta de la investigación -->
+            <div class="timeline-item" onclick="openModal('La pregunta de la investigación')">
+                <div class="timeline-graphic"><div class="timeline-circle"></div></div>
+                <div class="timeline-card">
+                    <div class="card-header-row"><div class="card-title">La pregunta de la investigación</div><div class="card-time">3:30 PM</div></div>
+                    <div class="card-empty-content"></div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- BOTÓN FLOTANTE -->
+        <div class="fab" onclick="openModal('Agregar nueva nota o recordatorio')">+</div>
+
+        <!-- BARRA INFERIOR -->
+        <div class="bottom-nav">
+            <div class="nav-item active" onclick="openModal('Vista de Cronograma')">🕒</div>
+            <div class="nav-item" onclick="openModal('Mi Perfil de Investigador')">👤</div>
+        </div>
+
+    </div>
+
+    <!-- ====================================================
+         MODAL GENÉRICO (Para "En Construcción")
+         ==================================================== -->
+    <div class="modal-overlay" id="constructionModal">
+        <div class="modal-content" style="text-align: center; justify-content: center;">
+            <div style="font-size: 6rem; margin-bottom: 20px;">🚧</div>
+            <h2 style="border: none; padding-bottom: 0; margin-bottom: 15px; justify-content: center;">En Construcción</h2>
+            <p id="modal-text" style="font-size: 1.2rem;">Esta funcionalidad estará disponible próximamente en la versión final.</p>
+            <button class="btn-close-modal" onclick="closeModal('constructionModal')" style="max-width: 300px; margin: 20px auto 0 auto;">Entendido</button>
+        </div>
+    </div>
+
+    <!-- ====================================================
+         MODAL 1: INTRODUCCIÓN AL EVENTO
+         ==================================================== -->
+    <div class="modal-overlay" id="modalIntro">
+        <div class="modal-content">
+            <h2>📌 Introducción al Evento</h2>
+            
+            <div class="toggle-btn-group">
+                <button id="btnIntro1" class="toggle-tab-btn active" onclick="switchTabIntro('intro1', 'btnIntro1')">
+                    🎯 1. Justificación y Objetivo
+                </button>
+                <button id="btnIntro2" class="toggle-tab-btn" onclick="switchTabIntro('intro2', 'btnIntro2')">
+                    📅 2. Datos Logísticos
+                </button>
+            </div>
+
+            <div id="intro1" class="tab-panel active">
+                <div class="comp-box bloom">
+                    <h4 style="color:var(--sena-azul); margin-bottom:15px;">Contexto y Desafío</h4>
+                    <p>En el contexto actual de transformación digital acelerada, la Inteligencia Artificial emerge como un catalizador de cambio en los procesos educativos. Sin embargo, persiste una brecha entre el potencial de la IA y su aplicación efectiva en la investigación y práctica pedagógica cotidiana.</p>
+                    <p>Frente a este desafío, <strong>no se trata de competir con la IA</strong> en tareas que ella puede realizar, sino de potenciar aquello que es irreductiblemente humano: <strong>interrogar con propósito, contextualizar con sentido, contrastar con criterio, verificar con rigor y cocrear con empatía</strong>.</p>
+                </div>
+
+                <div class="comp-box emergente">
+                    <h4 style="color:var(--sena-verde); margin-bottom:15px;">Objetivo de la Capacitación</h4>
+                    <p>Integrar herramientas de inteligencia artificial en los procesos de investigación pedagógica en el marco de la política de gestión de IA en el SENA.</p>
+                </div>
+            </div>
+
+            <div id="intro2" class="tab-panel">
+                <div class="callout" style="background: #E3F2FD; border-left-color: var(--sena-azul); color: #0D47A1;">
+                    <div class="callout-title" style="color: var(--sena-azul);">📍 Información Logística</div>
+                    <ul style="margin-left: 20px; line-height: 1.8;">
+                        <li><strong>Modalidad:</strong> Presencial</li>
+                        <li><strong>Duración:</strong> 40 Horas</li>
+                        <li><strong>Fechas Grupo 1:</strong> 26 al 30 de Octubre de 2026</li>
+                        <li><strong>Fechas Grupo 2:</strong> 09 al 13 de Noviembre de 2026</li>
+                        <li><strong>Lugar:</strong> Centro de Comercio y Servicios (Cartagena, Bolívar).</li>
+                    </ul>
+                </div>
+                
+                <div class="comp-box" style="margin-top: 20px;">
+                    <h4 style="color:var(--text-main); margin-bottom:15px;">Método de Formación</h4>
+                    <p>La capacitación se desarrollará en sesiones presenciales de 8 horas diarias (8:00 AM - 5:00 PM), estructuradas bajo los 5 niveles de la Taxonomía Emergente:</p>
+                    <ul style="margin-left: 20px; margin-top: 10px; line-height: 1.8; color: var(--text-muted);">
+                        <li>Nivel 1: Interrogar y Contextualizar</li>
+                        <li>Nivel 2: Contrastar</li>
+                        <li>Nivel 3: Verificar</li>
+                        <li>Nivel 4: Curar y Arbitrar</li>
+                        <li>Nivel 5: Cocrear</li>
+                    </ul>
+                </div>
+            </div>
+
+            <button class="btn-close-modal" onclick="closeModal('modalIntro')">Cerrar Introducción</button>
+        </div>
+    </div>
+
+    <!-- ====================================================
+         MODAL 2: REFLEXIÓN INICIAL (4 PESTAÑAS)
+         ==================================================== -->
+    <div class="modal-overlay" id="modalReflexion">
+        <div class="modal-content">
+            <h2>🧠 Actividad de Reflexión Inicial</h2>
+            
+            <div class="toggle-btn-group">
+                <button id="btnRef1" class="toggle-tab-btn active" onclick="switchTabRef('ref1', 'btnRef1')">
+                    🚨 1. Pregunta
+                </button>
+                <button id="btnRef2" class="toggle-tab-btn" onclick="switchTabRef('ref2', 'btnRef2')">
+                    🎯 2. Objetivo
+                </button>
+                <button id="btnRef3" class="toggle-tab-btn" onclick="switchTabRef('ref3', 'btnRef3')">
+                    ✍️ 3. Compromiso
+                </button>
+                <button id="btnRef4" class="toggle-tab-btn" onclick="switchTabRef('ref4', 'btnRef4')">
+                    📌 4. Definición y Rutas
+                </button>
+            </div>
+
+            <div id="ref1" class="tab-panel active">
+                <div class="comp-box bloom">
+                    <h4 style="color:var(--sena-azul); margin-bottom:15px;">El Asistente vs. El Jefe</h4>
+                    <p>¿Quién de ustedes le entregaría su proyecto de investigación a un becario de primer semestre para que lo haga solo, sin supervisión? <strong>¿Nadie?</strong></p>
+                    <p style="margin-top: 15px; font-size: 1.3rem; color: var(--sena-naranja); font-weight: 700;">
+                        Entonces, ¿por qué muchos le piden a la IA que "les haga la pregunta de investigación" y copian y pegan lo primero que sale?
+                    </p>
+                </div>
+            </div>
+
+            <div id="ref2" class="tab-panel">
+                <div class="comp-box emergente">
+                    <h4 style="color:var(--sena-verde); margin-bottom:15px;">El Objetivo de la Semana</h4>
+                    <p>La IA <strong>no es su jefe; es su asistente a cargo</strong>. Durante estos 5 días, vamos a aprender a darle instrucciones precisas, a validar sus respuestas y a mantener el timón de la investigación pedagógica.</p>
+                    <p>La IA es un copiloto, pero el piloto es ustedes.</p>
+                </div>
+            </div>
+
+            <div id="ref3" class="tab-panel">
+                <div class="callout">
+                    <div class="callout-title">✍️ Compromiso en Post-it</div>
+                    <p>Escribe en un papel una frase de cómo vas a "domesticar" a tu asistente IA durante esta semana.</p>
+                    <p style="margin-top: 15px; font-style: italic; color: var(--sena-verde); font-weight: 600; font-size: 1.2rem;">
+                        Ejemplo: "Yo le dicto el contexto, ella me ayuda a redactar".
+                    </p>
+                </div>
+            </div>
+
+            <div id="ref4" class="tab-panel">
+                <div class="comp-box bloom">
+                    <h4 style="color:var(--sena-azul); margin-bottom:15px;">🔬 Investigación Aplicada</h4>
+                    <p><strong>Objeto de estudio:</strong> Problemas técnicos, tecnológicos, socioeconómicos o de un sector productivo/disciplinar específico.</p>
+                    <p><strong>Propósito y Alcance:</strong> Crear, probar o perfeccionar productos, prototipos, software, servicios o procesos técnicos concretos.</p>
+                    <p><strong>Observación:</strong> El investigador observa el problema técnico como un <em>objeto externo</em> desde una postura analítica para optimizarlo.</p>
+                </div>
+
+                <div class="comp-box emergente">
+                    <h4 style="color:var(--sena-verde); margin-bottom:15px;">🎓 Investigación Pedagógica</h4>
+                    <p><strong>Objeto de estudio:</strong> Las prácticas de formación, los procesos de aprendizaje, las mediaciones didácticas y las competencias.</p>
+                    <p><strong>Propósito y Alcance:</strong> Transformar la práctica del instructor, comprender cómo se aprende y mejorar la Formación Profesional Integral (FPI).</p>
+                    <p><strong>Observación:</strong> El instructor forma parte activa del fenómeno. Se observan interacciones entre <em>sujetos cognoscentes</em> y el instructor convierte su práctica en objeto de indagación.</p>
+                </div>
+
+                <div class="callout">
+                    <div class="callout-title">⚠️ La Pregunta Incómoda: "¿Dónde aparecen los aprendices?"</div>
+                    <p>Ocurre cuando se ejecutan proyectos de investigación aplicada de alta producción técnica (patentes, prototipos SENNOVA), pero los instructores investigan aislados. La investigación aplicada solo cobra sentido SENA cuando el problema técnico sirve como <strong>pretexto pedagógico</strong> para desarrollar competencias en los aprendices.</p>
+                </div>
+            </div>
+
+            <button class="btn-close-modal" onclick="closeModal('modalReflexion')">Cerrar Reflexión</button>
+        </div>
+    </div>
+
+    <!-- ====================================================
+         MODAL 3: CONTEXTUALIZACIÓN (3 PESTAÑAS)
+         ==================================================== -->
+    <div class="modal-overlay" id="modalContexto">
+        <div class="modal-content">
+            <h2>📌 Contextualización: La Taxonomía Emergente y el Rol de la IA</h2>
+            
+            <div class="toggle-btn-group">
+                <button id="btnCtx1" class="toggle-tab-btn active" onclick="switchTabCtx('ctx1', 'btnCtx1')">
+                    🔬 1. Taxonomía Tradicional
+                </button>
+                <button id="btnCtx2" class="toggle-tab-btn" onclick="switchTabCtx('ctx2', 'btnCtx2')">
+                    🔄 2. Taxonomía Emergente
+                </button>
+                <button id="btnCtx3" class="toggle-tab-btn" onclick="switchTabCtx('ctx3', 'btnCtx3')">
+                    ⚠️ 3. Soberanía Cognitiva
+                </button>
+            </div>
+
+            <div id="ctx1" class="tab-panel active">
+                <div class="comp-box bloom">
+                    <h4 style="color:var(--sena-azul); margin-bottom:15px;">🔬 Taxonomía Tradicional (Bloom)</h4>
+                    <p>Escala lineal de 6 niveles: Recordar, Comprender, Aplicar, Analizar, Evaluar, Crear. El investigador escala solo, con su propio esfuerzo cognitivo.</p>
+                </div>
+            </div>
+
+            <div id="ctx2" class="tab-panel">
+                <div class="comp-box emergente">
+                    <h4 style="color:var(--sena-verde); margin-bottom:15px;">🔄 Taxonomía Emergente (N0 a N6)</h4>
+                    <p><strong>Nivel 0: Explorar y Situar.</strong> Aquí el investigador <strong>no delega</strong>; inyecta contexto (Context Engineering) y se sumerge en el territorio.</p>
+                    <p>Solo después de este anclaje humano, la IA puede ser usada como asistente en los niveles superiores (Formular, Analizar, Transferir).</p>
+                </div>
+            </div>
+
+            <div id="ctx3" class="tab-panel">
+                <div class="callout">
+                    <div class="callout-title">⚠️ Soberanía Cognitiva</div>
+                    <p>En el SENA, la IA nunca reemplaza al investigador. Es un copiloto que nos ayuda a procesar la complejidad del territorio, siempre y cuando nosotros mantengamos la <strong>soberanía cognitiva</strong> y la pregunta de investigación.</p>
+                </div>
+            </div>
+
+            <button class="btn-close-modal" onclick="closeModal('modalContexto')">Cerrar Contextualización</button>
+        </div>
+    </div>
+
+    <!-- ====================================================
+         MODAL 4: MAPA DE EMPATÍA (NUEVO)
+         ==================================================== -->
+    <div class="modal-overlay" id="modalEmpatia">
+        <div class="modal-content">
+            <h2>🗺️ Mapa de Empatía y Análisis con IA</h2>
+            
+            <div class="toggle-btn-group">
+                <button id="btnEmp1" class="toggle-tab-btn active" onclick="switchTabEmp('emp1', 'btnEmp1')">
+                    🧠 1. ¿Qué es y cómo se construye?
+                </button>
+                <button id="btnEmp2" class="toggle-tab-btn" onclick="switchTabEmp('emp2', 'btnEmp2')">
+                    📊 2. Del Mapa a la Estrategia (IA)
+                </button>
+                <button id="btnEmp3" class="toggle-tab-btn" onclick="switchTabEmp('emp3', 'btnEmp3')">
+                    📝 3. Prompt para la IA
+                </button>
+            </div>
+
+            <!-- PESTAÑA 1: EXPLICACIÓN Y EJEMPLO -->
+            <div id="emp1" class="tab-panel active">
+                <div class="callout" style="background: #E3F2FD; border-left-color: var(--sena-azul); color: #0D47A1; margin-top: 0;">
+                    <div class="callout-title" style="color: var(--sena-azul);">🎯 El Objetivo del Mapa</div>
+                    <p>Antes de investigar, debemos <strong>"ponernos en los zapatos"</strong> de los actores involucrados (aprendices, campesinos, Mipymes, etc.). El mapa de empatía nos ayuda a salir del escritorio y entender sus dolores, sueños y realidades.</p>
+                </div>
+
+                <div class="comp-box bloom">
+                    <h4 style="color:var(--sena-azul); margin-bottom:15px;">¿Cómo se construye? (Paso a Paso)</h4>
+                    <ol style="margin-left: 20px; line-height: 1.8; color: var(--text-muted);">
+                        <li><strong>El Centro:</strong> Escriban en el centro el tema de su grupo (su Constructo 1).</li>
+                        <li><strong>Los 6 Cuadrantes:</strong> Usando post-its, respondan: ¿Qué siente?, ¿Qué escucha?, ¿Qué ve?, ¿Qué se ha hecho?, ¿Con quién interactúa? y ¿Qué podemos hacer?</li>
+                        <li><strong>Regla de Oro:</strong> No usen computadores ni IA en este paso. Usen su conocimiento del territorio y su empatía.</li>
+                    </ol>
+                </div>
+
+                <img src="img/empatia.png" alt="Ejemplo de Mapa de Empatía" class="empatia-image" onerror="this.style.display='none';">
+            </div>
+
+            <!-- PESTAÑA 2: DOFA Y SEMAFORIZACIÓN -->
+            <div id="emp2" class="tab-panel">
+                <div class="comp-box bloom">
+                    <h4 style="color:var(--sena-azul); margin-bottom:15px;">1. De los Post-its a la Matriz DOFA</h4>
+                    <p>La IA (o ustedes mismos) agrupará los post-its en Debilidades, Oportunidades, Fortalezas y Amenazas. Luego, cruzará estos factores para generar <strong>Estrategias Emergentes</strong> (Ej: Fortaleza + Oportunidad = Estrategia Ofensiva).</p>
+                </div>
+
+                <div class="comp-box emergente">
+                    <h4 style="color:var(--sena-verde); margin-bottom:15px;">2. La Matriz de Pertinencia (Semáforo)</h4>
+                    <p>No todas las estrategias son responsabilidad del SENA. Aquí filtramos para definir nuestro nicho de acción:</p>
+                    <ul style="margin-top: 10px; line-height: 1.8;">
+                        <li>🟢 <strong>Verde (Prioridad SENA):</strong> Estrategias que el SENA SÍ puede resolver directamente (Formación, Certificación, Investigación Aplicada, Emprendimiento, APE).</li>
+                        <li>🟡 <strong>Amarillo (Fuera de competencia):</strong> Estrategias importantes, pero que dependen de otros actores (Alcaldía, Policía, Vías, etc.).</li>
+                        <li>🔴 <strong>Rojo (Brecha crítica):</strong> Problemas estructurales muy difíciles de cerrar o donde no hay un actor claro.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- PESTAÑA 3: PROMPT PARA LA IA -->
+            <div id="emp3" class="tab-panel">
+                <div class="callout" style="margin-top: 0;">
+                    <div class="callout-title">🤖 Prompt Maestro para la IA</div>
+                    <p>Copia y pega este texto en ChatGPT, Gemini o Claude, y <strong>adjunta la foto de tu cartelera</strong>.</p>
+                </div>
+
+                <div class="comp-box" style="background: #1E293B; color: #E2E8F0; font-family: monospace; font-size: 0.95rem; padding: 20px; border-radius: 12px; line-height: 1.5;">
+                    Actúa como un consultor experto en prospectiva estratégica y desarrollo territorial. Te adjunto la imagen de un Mapa de Empatía construido por una comunidad. Necesito que analices esta información y generes un informe estructurado con los siguientes puntos:<br><br>
+                    1. <strong>Mapa de Actores:</strong> Identifica y clasifica a los actores clave (públicos, privados, comunitarios, academia).<br><br>
+                    2. <strong>Matriz DOFA:</strong> Extrae las Debilidades, Oportunidades, Fortalezas y Amenazas a partir de los post-it.<br><br>
+                    3. <strong>Estrategias Emergentes (Cruces DOFA):</strong> Formula 4 estrategias cruzadas: Ofensiva (F+O), Defensiva (F+A), Reorientación (D+O) y Supervivencia (D+A).<br><br>
+                    4. <strong>Matriz de Pertinencia (Semaforización):</strong> Toma las 4 estrategias y clasifícalas según este criterio:<br>
+                    - 🟢 <strong>Verde (Prioridad SENA):</strong> El SENA puede resolverlo (Formación, Certificación, Investigación, Emprendimiento, APE).<br>
+                    - 🟡 <strong>Amarilla (Importante, fuera de competencia):</strong> Requiere otros actores (Alcaldía, Vías, Orden Público).<br>
+                    - 🔴 <strong>Roja (Brecha crítica):</strong> Muy difícil de cerrar o sin actor claro.<br><br>
+                    Devuélveme el resultado en formato de tabla.
+                </div>
+            </div>
+
+            <button class="btn-close-modal" onclick="closeModal('modalEmpatia')">Cerrar Mapa de Empatía</button>
+        </div>
+    </div>
+
+    <!-- ====================================================
+         MODAL 5: PRESENTACIÓN DE PARTICIPANTES (27 BOTONES)
+         ==================================================== -->
+    <div class="modal-overlay" id="modalParticipantes">
+        <div class="modal-content">
+            <h2>
+                👥 Presentación de los Participantes
+                <button class="btn-reset" onclick="resetParticipantes()">🔄 Reiniciar</button>
+            </h2>
+            <p style="font-size: 1rem; color: var(--text-muted); margin-bottom: 25px;">
+                Haz clic en el número para descubrir el rasgo. El botón cambiará a rojo una vez seleccionado.
+            </p>
+            
+            <div class="participants-grid" id="gridParticipantes">
+                <!-- Fila 1 -->
+                <button class="participant-btn" id="btnP1" onclick="seleccionarParticipante(1)"><span class="num">1</span></button>
+                <button class="participant-btn" id="btnP2" onclick="seleccionarParticipante(2)"><span class="num">2</span></button>
+                <button class="participant-btn" id="btnP3" onclick="seleccionarParticipante(3)"><span class="num">3</span></button>
+                <button class="participant-btn" id="btnP4" onclick="seleccionarParticipante(4)"><span class="num">4</span></button>
+                <button class="participant-btn" id="btnP5" onclick="seleccionarParticipante(5)"><span class="num">5</span></button>
+                <button class="participant-btn" id="btnP6" onclick="seleccionarParticipante(6)"><span class="num">6</span></button>
+                <button class="participant-btn" id="btnP7" onclick="seleccionarParticipante(7)"><span class="num">7</span></button>
+                <button class="participant-btn" id="btnP8" onclick="seleccionarParticipante(8)"><span class="num">8</span></button>
+                <button class="participant-btn" id="btnP9" onclick="seleccionarParticipante(9)"><span class="num">9</span></button>
+                
+                <!-- Fila 2 -->
+                <button class="participant-btn" id="btnP10" onclick="seleccionarParticipante(10)"><span class="num">10</span></button>
+                <button class="participant-btn" id="btnP11" onclick="seleccionarParticipante(11)"><span class="num">11</span></button>
+                <button class="participant-btn" id="btnP12" onclick="seleccionarParticipante(12)"><span class="num">12</span></button>
+                <button class="participant-btn" id="btnP13" onclick="seleccionarParticipante(13)"><span class="num">13</span></button>
+                <button class="participant-btn" id="btnP14" onclick="seleccionarParticipante(14)"><span class="num">14</span></button>
+                <button class="participant-btn" id="btnP15" onclick="seleccionarParticipante(15)"><span class="num">15</span></button>
+                <button class="participant-btn" id="btnP16" onclick="seleccionarParticipante(16)"><span class="num">16</span></button>
+                <button class="participant-btn" id="btnP17" onclick="seleccionarParticipante(17)"><span class="num">17</span></button>
+                <button class="participant-btn" id="btnP18" onclick="seleccionarParticipante(18)"><span class="num">18</span></button>
+
+                <!-- Fila 3 -->
+                <button class="participant-btn" id="btnP19" onclick="seleccionarParticipante(19)"><span class="num">19</span></button>
+                <button class="participant-btn" id="btnP20" onclick="seleccionarParticipante(20)"><span class="num">20</span></button>
+                <button class="participant-btn" id="btnP21" onclick="seleccionarParticipante(21)"><span class="num">21</span></button>
+                <button class="participant-btn" id="btnP22" onclick="seleccionarParticipante(22)"><span class="num">22</span></button>
+                <button class="participant-btn" id="btnP23" onclick="seleccionarParticipante(23)"><span class="num">23</span></button>
+                <button class="participant-btn" id="btnP24" onclick="seleccionarParticipante(24)"><span class="num">24</span></button>
+                <button class="participant-btn" id="btnP25" onclick="seleccionarParticipante(25)"><span class="num">25</span></button>
+                <button class="participant-btn" id="btnP26" onclick="seleccionarParticipante(26)"><span class="num">26</span></button>
+                <button class="participant-btn" id="btnP27" onclick="seleccionarParticipante(27)"><span class="num">27</span></button>
+            </div>
+
+            <button class="btn-close-modal" onclick="closeModal('modalParticipantes')">Cerrar Lista</button>
+        </div>
+    </div>
+
+    <!-- ====================================================
+         MODAL 6: DETALLE DEL PERSONAJE MISTERIOSO
+         ==================================================== -->
+    <div class="modal-overlay" id="modalPersonajeDetalle" style="z-index: 200;">
+        <div class="modal-content" style="max-width: 1000px;">
+            <div id="personajeDetalleContenido" style="display: flex; flex-direction: column; flex-grow: 1;">
+                <!-- Se llena dinámicamente con JS -->
+            </div>
+            <button class="btn-close-modal" onclick="closeModal('modalPersonajeDetalle')">Volver a la Lista</button>
+        </div>
+    </div>
+
+    <!-- ====================================================
+         MODAL 7: CONFORMACIÓN DE GRUPOS (CON IMÁGENES)
+         ==================================================== -->
+    <div class="modal-overlay" id="modalGrupos">
+        <div class="modal-content">
+            <h2>👥 Conformación de Grupos de Trabajo</h2>
+            <p style="font-size: 1rem; color: var(--text-muted); margin-bottom: 25px;">
+                Selecciona un grupo para ver su enfoque. Activa el interruptor para revelar los integrantes.
+            </p>
+            
+            <!-- 5 TOGGLE BUTTONS -->
+            <div class="toggle-btn-group">
+                <button id="btnG1" class="toggle-tab-btn active" onclick="switchTabGrupo('g1', 'btnG1')">
+                    🔬 1. Biotecnología
+                </button>
+                <button id="btnG2" class="toggle-tab-btn" onclick="switchTabGrupo('g2', 'btnG2')">
+                    🥗 2. Seguridad Alimentaria
+                </button>
+                <button id="btnG3" class="toggle-tab-btn" onclick="switchTabGrupo('g3', 'btnG3')">
+                    🚜 3. Desarrollo Rural
+                </button>
+                <button id="btnG4" class="toggle-tab-btn" onclick="switchTabGrupo('g4', 'btnG4')">
+                    ⚙️ 4. Industria 4.0
+                </button>
+                <button id="btnG5" class="toggle-tab-btn" onclick="switchTabGrupo('g5', 'btnG5')">
+                    💡 5. Pedagogía e Inclusión
+                </button>
+            </div>
+
+            <!-- SWITCH VISIBLE/HIDE -->
+            <div class="switch-container">
+                <span class="switch-label">¿Mostrar Integrantes?</span>
+                <label class="switch">
+                    <input type="checkbox" id="switchIntegrantes" onchange="toggleIntegrantes(this.checked)">
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <!-- CONTENIDO DE LOS GRUPOS CON IMÁGENES -->
+            <div id="g1" class="tab-panel active">
+                <div class="grupo-content">
+                    <!-- IMAGEN DEL GRUPO 1 -->
+                    <img src="img/g1.jpeg" alt="Grupo 1 Biotecnología" class="grupo-imagen" onerror="this.style.display='none'">
+                    
+                    <div class="grupo-titulo">Biotecnología, Bioeconomía y Economía Circular</div>
+                    <div class="grupo-descripcion">Foco: Valorización de subproductos orgánicos, microalgas, biomasa y biodiversidad.</div>
+                    
+                    <ul id="listaG1" class="integrantes-lista" style="display: none;">
+                        <li class="integrante-item"><span>👩‍🔬</span> Martha Elizabeth Cortés Rico</li>
+                        <li class="integrante-item"><span>👩‍🔬</span> Ángela Rocío Quevedo Isaza</li>
+                        <li class="integrante-item"><span>👩‍🌾</span> Barbara Angélica Venegas Moreno</li>
+                        <li class="integrante-item"><span>👩‍🔬</span> María Eugenia Agámez Jiménez</li>
+                        <li class="integrante-item"><span>👩‍🌾</span> Silvia Patricia Moreno Páez</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div id="g2" class="tab-panel">
+                <div class="grupo-content">
+                    <!-- IMAGEN DEL GRUPO 2 -->
+                    <img src="img/g2.jpeg" alt="Grupo 2 Seguridad Alimentaria" class="grupo-imagen" onerror="this.style.display='none'">
+                    
+                    <div class="grupo-titulo">Seguridad Alimentaria (SAN) y Agroindustria</div>
+                    <div class="grupo-descripcion">Foco: Formulación bromatológica, panificación, cafés especiales y análisis sensorial.</div>
+                    
+                    <ul id="listaG2" class="integrantes-lista" style="display: none;">
+                        <li class="integrante-item"><span>👩‍🍳</span> Yeimmy Maritza Neusa Díaz</li>
+                        <li class="integrante-item"><span>👩‍🍳</span> Ana Carolina Acuña Gómez</li>
+                        <li class="integrante-item"><span>👨‍🍳</span> Santiago Vargas Castro</li>
+                        <li class="integrante-item"><span>👩‍🔬</span> Beatriz Lorena Patiño Velásquez</li>
+                        <li class="integrante-item"><span>👩‍🎨</span> Carmen Sofía Reinel Corredor</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div id="g3" class="tab-panel">
+                <div class="grupo-content">
+                    <!-- IMAGEN DEL GRUPO 3 -->
+                    <img src="img/g3.jpeg" alt="Grupo 3 Desarrollo Rural" class="grupo-imagen" onerror="this.style.display='none'">
+                    
+                    <div class="grupo-titulo">Desarrollo Rural, Agroecología y Políticas</div>
+                    <div class="grupo-descripcion">Foco: Extensionismo, agroecología, movilidad eléctrica y apps para el agro.</div>
+                    
+                    <ul id="listaG3" class="integrantes-lista" style="display: none;">
+                        <li class="integrante-item"><span>👨‍🌾</span> Ronald David Soleno Wilches</li>
+                        <li class="integrante-item"><span>👨‍🌾</span> Julián Andrés Pedroza Vivas</li>
+                        <li class="integrante-item"><span>👩‍🌾</span> María Fernanda Guaca Sandoval</li>
+                        <li class="integrante-item"><span>👨‍💻</span> Edison Andrés Sandoval Ordóñez</li>
+                        <li class="integrante-item"><span>👨‍🔧</span> Juan José Urazán Garcés</li>
+                        <li class="integrante-item"><span>👨‍🌾</span> Juan Felipe Solarte Paredes</li>
+                        <li class="integrante-item"><span>🌳</span> Fernando Gonzales Torres</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div id="g4" class="tab-panel">
+                <div class="grupo-content">
+                    <!-- IMAGEN DEL GRUPO 4 -->
+                    <img src="img/g4.jpeg" alt="Grupo 4 Industria 4.0" class="grupo-imagen" onerror="this.style.display='none'">
+                    
+                    <div class="grupo-titulo">Industria 4.0, Automatización, Robótica y Logística</div>
+                    <div class="grupo-descripcion">Foco: Mecatrónica, robótica, logística 4.0, VR/AR y seguridad industrial.</div>
+                    
+                    <ul id="listaG4" class="integrantes-lista" style="display: none;">
+                        <li class="integrante-item"><span>👩‍🔧</span> Leidy Johanna Forero Rincón</li>
+                        <li class="integrante-item"><span>👩‍🔬</span> Diana Carolina Gálvez Coy</li>
+                        <li class="integrante-item"><span>👨‍💻</span> Johan Guillermo Gómez Flórez</li>
+                        <li class="integrante-item"><span>👩‍💼</span> Ángela Patricia Rojas Mejía</li>
+                        <li class="integrante-item"><span>👨‍💼</span> Mauricio Caicedo Marín</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div id="g5" class="tab-panel">
+                <div class="grupo-content">
+                    <!-- IMAGEN DEL GRUPO 5 -->
+                    <img src="img/g5.jpeg" alt="Grupo 5 Pedagogía e Inclusión" class="grupo-imagen" onerror="this.style.display='none'">
+                    
+                    <div class="grupo-titulo">Comunicación Estratégica y Mediaciones Pedagógicas Inclusivas</div>
+                    <div class="grupo-descripcion">Foco: Lúdica (STEAM/LEGO), inclusión en Lengua de Señas, marketing digital y formación docente.</div>
+                    
+                    <ul id="listaG5" class="integrantes-lista" style="display: none;">
+                        <li class="integrante-item"><span>👨‍🏫</span> Jonathan Calderón Rojas</li>
+                        <li class="integrante-item"><span>👨‍🏫</span> Angel Raúl Roldan Cepero</li>
+                        <li class="integrante-item"><span>👩‍💼</span> Claudia Juliana León Pinto</li>
+                        <li class="integrante-item"><span>👩‍🏫</span> Angela Isadora Cardona Duque</li>
+                        <li class="integrante-item"><span>👨‍💼</span> José Luis Castaño Muñoz</li>
+                    </ul>
+                </div>
+            </div>
+
+            <button class="btn-close-modal" onclick="closeModal('modalGrupos')">Cerrar Grupos</button>
+        </div>
+    </div>
+
+    <!-- SCRIPT -->
+    <script>
+        // FUNCIÓN PARA ABRIR MODALES VACÍOS
+        function openModal(message) {
+            const modal = document.getElementById('constructionModal');
+            const text = document.getElementById('modal-text');
+            text.innerText = message;
+            modal.classList.add('active');
+        }
+
+        // FUNCIÓN PARA ABRIR LOS MODALES CON CONTENIDO REAL
+        function openContentModal(id) {
+            if (id === 'intro') {
+                document.getElementById('modalIntro').classList.add('active');
+                switchTabIntro('intro1', 'btnIntro1');
+            } else if (id === 'reflexion') {
+                document.getElementById('modalReflexion').classList.add('active');
+                switchTabRef('ref1', 'btnRef1');
+            } else if (id === 'contexto') {
+                document.getElementById('modalContexto').classList.add('active');
+                switchTabCtx('ctx1', 'btnCtx1');
+            } else if (id === 'empatia') {
+                document.getElementById('modalEmpatia').classList.add('active');
+                switchTabEmp('emp1', 'btnEmp1');
+            } else if (id === 'participantes') {
+                document.getElementById('modalParticipantes').classList.add('active');
+            } else if (id === 'grupos') {
+                document.getElementById('modalGrupos').classList.add('active');
+                switchTabGrupo('g1', 'btnG1');
+                document.getElementById('switchIntegrantes').checked = false;
+                toggleIntegrantes(false);
+            } else {
+                openModal('Contenido en construcción');
+            }
+        }
+
+        // FUNCIÓN PARA CERRAR CUALQUIER MODAL
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        // LÓGICA DE TOGGLE BUTTONS PARA EL MODAL DE INTRODUCCIÓN
+        function switchTabIntro(panelId, btnId) {
+            document.querySelectorAll('#intro1, #intro2').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('#btnIntro1, #btnIntro2').forEach(b => b.classList.remove('active'));
+            document.getElementById(panelId).classList.add('active');
+            document.getElementById(btnId).classList.add('active');
+        }
+
+        // LÓGICA DE TOGGLE BUTTONS PARA EL MODAL DE REFLEXIÓN
+        function switchTabRef(panelId, btnId) {
+            document.querySelectorAll('#ref1, #ref2, #ref3, #ref4').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('#btnRef1, #btnRef2, #btnRef3, #btnRef4').forEach(b => b.classList.remove('active'));
+            document.getElementById(panelId).classList.add('active');
+            document.getElementById(btnId).classList.add('active');
+        }
+
+        // LÓGICA DE TOGGLE BUTTONS PARA EL MODAL DE CONTEXTUALIZACIÓN
+        function switchTabCtx(panelId, btnId) {
+            document.querySelectorAll('#ctx1, #ctx2, #ctx3').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('#btnCtx1, #btnCtx2, #btnCtx3').forEach(b => b.classList.remove('active'));
+            document.getElementById(panelId).classList.add('active');
+            document.getElementById(btnId).classList.add('active');
+        }
+
+        // LÓGICA DE TOGGLE BUTTONS PARA EL MODAL DE EMPATÍA
+        function switchTabEmp(panelId, btnId) {
+            document.querySelectorAll('#emp1, #emp2, #emp3').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('#btnEmp1, #btnEmp2, #btnEmp3').forEach(b => b.classList.remove('active'));
+            document.getElementById(panelId).classList.add('active');
+            document.getElementById(btnId).classList.add('active');
+        }
+
+        // LÓGICA DE TOGGLE BUTTONS PARA EL MODAL DE GRUPOS
+        function switchTabGrupo(panelId, btnId) {
+            document.querySelectorAll('#g1, #g2, #g3, #g4, #g5').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('#btnG1, #btnG2, #btnG3, #btnG4, #btnG5').forEach(b => b.classList.remove('active'));
+            document.getElementById(panelId).classList.add('active');
+            document.getElementById(btnId).classList.add('active');
+        }
+
+        // LÓGICA DEL SWITCH PARA MOSTRAR/OCULTAR INTEGRANTES
+        function toggleIntegrantes(mostrar) {
+            for (let i = 1; i <= 5; i++) {
+                const lista = document.getElementById('listaG' + i);
+                if (lista) {
+                    lista.style.display = mostrar ? 'grid' : 'none';
+                }
+            }
+        }
+
+        // ====================================================
+        // BASE DE DATOS DE LOS 27 PERSONAJES Y SUS MARCAS
+        // ====================================================
+        const personajes = {
+            1: { rasgo: "Estratega de la gestión industrial y seguridad en el trabajo, apasionada por la optimización de procesos y el rigor normativo en entornos productivos.", nombre: "Ángela Patricia Rojas Mejía", marca: "⭐", grupo: "GRUPO 4" },
+            2: { rasgo: "Investigadora apasionada de la biotecnología agroindustrial caribeña, enfocada en la agregación de valor a cultivos locales y soberanía alimentaria.", nombre: "María Eugenia Agámez Jiménez", marca: "⭕", grupo: "GRUPO 1" },
+            3: { rasgo: "Experto en gestión comercial y mercadeo del Eje Cafetero, enfocado en conectar la dinámica de ventas y la inteligencia de mercados con el emprendimiento.", nombre: "José Luis Castaño Muñoz", marca: "🔷", grupo: "GRUPO 5" },
+            4: { rasgo: "Mente mecatrónica y de automatización industrial, apasionada por la robótica, el control de procesos y la modernización tecnológica de la industria.", nombre: "Leidy Johanna Forero Rincón", marca: "⭐", grupo: "GRUPO 4" },
+            5: { rasgo: "Especialista en robótica y automatización, impulsadora del desarrollo de sistemas mecatrónicos avanzados e integración 4.0 en la formación técnica.", nombre: "Diana Carolina Gálvez Coy", marca: "⭐", grupo: "GRUPO 4" },
+            6: { rasgo: "Guardiana de la tradición e innovación cafetera, experta en aseguramiento de calidad, perfilación organoléptica y transformación agroindustrial del grano.", nombre: "Beatriz Lorena Patiño Velásquez", marca: "🔺", grupo: "GRUPO 2" },
+            7: { rasgo: "Investigadora del desarrollo rural y las ciencias agropecuarias, apasionada por el fortalecimiento de la producción limpia y el empoderamiento comunitario en el Cauca.", nombre: "María Fernanda Guaca Sandoval", marca: "🔶", grupo: "GRUPO 3" },
+            8: { rasgo: "Profesional del Centro Agropecuario del Cauca, vinculado al desarrollo rural y las ciencias agropecuarias.", nombre: "Juan Felipe Solarte Paredes", marca: "🔶", grupo: "GRUPO 3" },
+            9: { rasgo: "Maestra de la panificación artesanal y masa madre, enfocada en la nutrición saludable, la panadería inclusiva y la seguridad alimentaria campesina.", nombre: "Ana Carolina Acuña Gómez", marca: "🔺", grupo: "GRUPO 2" },
+            10: { rasgo: "Innovador digital enfocado en la logística 4.0, apasionado por integrar la Realidad Virtual, Aumentada y la gamificación en el aprendizaje técnico.", nombre: "Johan Guillermo Gómez Flórez", marca: "⭐", grupo: "GRUPO 4" },
+            11: { rasgo: "Diseñadora e investigadora de la riqueza botánica, enfocada en la gastronomía de vanguardia y la estandarización sensorial de bebidas con plantas locales.", nombre: "Carmen Sofía Reinel Corredor", marca: "🔺", grupo: "GRUPO 2" },
+            12: { rasgo: "Maestro pastelero y panadero con más de 20 años de experiencia, enfocado en la formulación técnica y evaluación sensorial de bebidas e ingredientes regionales.", nombre: "Santiago Vargas Castro", marca: "🔺", grupo: "GRUPO 2" },
+            13: { rasgo: "Ingeniera forestal apasionada por la biodiversidad de la Orinoquía, líder en la catalogación biótica de reservas naturales y gestión ambiental.", nombre: "Silvia Patricia Moreno Páez", marca: "⭕", grupo: "GRUPO 1" },
+            14: { rasgo: "Educadora e investigadora del desarrollo humano y las finanzas, dedicada a la resignificación de la práctica pedagógica y la formación docente integral.", nombre: "Angela Isadora Cardona Duque", marca: "🔷", grupo: "GRUPO 5" },
+            15: { rasgo: "Estratega de los negocios internacionales y la logística de distribución, apasionado por el mercadeo global, las ventas y la competitividad empresarial.", nombre: "Mauricio Caicedo Marín", marca: "⭐", grupo: "GRUPO 4" },
+            16: { rasgo: "Líder investigativa y editora científica de TEINNOVA, articuladora de proyectos de biotecnología, Industria 4.0, economía circular y divulgación.", nombre: "Martha Elizabeth Cortés Rico", marca: "⭕", grupo: "GRUPO 1" },
+            17: { rasgo: "Arquitecto de software y MBA, enfocado en la creación de aplicaciones móviles de impacto social como 'Buscomida' para combatir el desperdicio de alimentos.", nombre: "Edison Andrés Sandoval Ordóñez", marca: "🔶", grupo: "GRUPO 3" },
+            18: { rasgo: "Estratega del marketing digital y creadora de contenido educativo, experta en comportamiento del consumidor, retail y diseño curricular por cualificaciones.", nombre: "Claudia Juliana León Pinto", marca: "🔷", grupo: "GRUPO 5" },
+            19: { rasgo: "Ingeniera forestal experta en bioeconomía y economía circular, dedicada a la producción de orellanas a partir de biomasa residual de café, cacao y palma.", nombre: "Barbara Angélica Venegas Moreno", marca: "⭕", grupo: "GRUPO 1" },
+            20: { rasgo: "Innovadora agroindustrial en nutrición inclusiva, pionera en el desarrollo de alimentos funcionales sin gluten y prototipos de vegetal con cacao y apps ambientales.", nombre: "Yeimmy Maritza Neusa Díaz", marca: "🔺", grupo: "GRUPO 2" },
+            21: { rasgo: "Politólogo y pedagogo de la lúdica, apasionado por el desarrollo de habilidades blandas a través de metodologías activas como STEAM y LEGO® Serious Play®.", nombre: "Jonathan Calderón Rojas", marca: "🔷", grupo: "GRUPO 5" },
+            22: { rasgo: "Promotor de la sostenibilidad y la agroecología, experto en biorremediación, gestión ambiental y alternativas de alimentación para especies menores.", nombre: "Julián Andrés Pedrosa Vivas", marca: "🔶", grupo: "GRUPO 3" },
+            23: { rasgo: "Bióloga y científica de bioprocesos, dedicada al cultivo de microalgas nativas como fuente proteica, cuero vegano por Kombucha y bioinsumos agrícolas.", nombre: "Ángela Rocío Quevedo Isaza", marca: "⭕", grupo: "GRUPO 1" },
+            24: { rasgo: "Líder social y defensor del SENA público, creador de recursos audiovisuales inclusivos en Lengua de Señas Colombiana para la enseñanza de los Derechos Laborales.", nombre: "Angel Raúl Roldan Cepero", marca: "🔷", grupo: "GRUPO 5" },
+            25: { rasgo: "Doctor en ciencias agropecuarias y estratega rural, coautor de políticas nacionales de asociatividad campesina y estandarización de bebidas ancestrales del Pacífico.", nombre: "Ronald David Soleno Wilches", marca: "🔶", grupo: "GRUPO 3" },
+            26: { rasgo: "Ingeniero e innovador del grupo DIDETIF, dedicado al desarrollo de prototipos industriales, movilidad eléctrica sustentable y transferencia tecnológica para el Pacífico.", nombre: "Juan José Urazán Garcés", marca: "🔶", grupo: "GRUPO 3" },
+            27: { rasgo: "Profesional del Centro Ambiental y Ecoturístico del Nororiente Amazónico, enfocado en la sostenibilidad y el ecoturismo en la región de Guainía.", nombre: "Fernando Gonzales Torres", marca: "🔶", grupo: "GRUPO 3" }
+        };
+
+        // FUNCIÓN PARA SELECCIONAR UN PARTICIPANTE Y ABRIR SU MODAL
+        function seleccionarParticipante(id) {
+            const btn = document.getElementById('btnP' + id);
+            btn.classList.add('selected');
+            openPersonajeModal(id);
+        }
+
+        // FUNCIÓN PARA ABRIR EL DETALLE DEL PERSONAJE
+        function openPersonajeModal(id) {
+            const personaje = personajes[id];
+            if (!personaje) return;
+
+            const contenedor = document.getElementById('personajeDetalleContenido');
+            
+            contenedor.innerHTML = `
+                <h2>Personaje Misterioso #${id}</h2>
+                
+                <div class="personaje-layout">
+                    <div class="personaje-rasgo">
+                        <h4>🔍 Rasgo / Esencia</h4>
+                        <p>"${personaje.rasgo}"</p>
+                    </div>
+                    
+                    <div class="personaje-marca-grande">
+                        <div class="personaje-marca-icon">${personaje.marca}</div>
+                        <div class="personaje-marca-texto">${personaje.grupo}</div>
+                    </div>
+                </div>
+
+                <div class="switch-container">
+                    <span class="switch-label">¿Revelar nombre real?</span>
+                    <label class="switch">
+                        <input type="checkbox" id="switchNombre" onchange="toggleNombre(this.checked)">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div id="nombreRealBox" class="nombre-real">
+                    ${personaje.nombre}
+                </div>
+            `;
+
+            document.getElementById('modalPersonajeDetalle').classList.add('active');
+        }
+
+        // FUNCIÓN PARA MOSTRAR U OCULTAR EL NOMBRE
+        function toggleNombre(mostrar) {
+            const box = document.getElementById('nombreRealBox');
+            if (mostrar) {
+                box.classList.add('visible');
+            } else {
+                box.classList.remove('visible');
+            }
+        }
+
+        // FUNCIÓN PARA REINICIAR TODOS LOS BOTONES A GRIS
+        function resetParticipantes() {
+            for (let i = 1; i <= 27; i++) {
+                const btn = document.getElementById('btnP' + i);
+                if (btn) {
+                    btn.classList.remove('selected');
+                }
+            }
+        }
+
+        // Cerrar al hacer clic fuera del contenido
+        document.querySelectorAll('.modal-overlay').forEach(overlay => {
+            overlay.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    this.classList.remove('active');
+                }
+            });
+        });
+    </script>
+
+</body>
+</html>
